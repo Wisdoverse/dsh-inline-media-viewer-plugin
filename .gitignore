@@ -1,0 +1,5 @@
+node_modules/
+
+# Repo-dedicated SSH key (never commit secrets)
+.ssh/
+*.pem
