@@ -97,6 +97,9 @@ through [`cordis.patch.yml`](cordis.patch.yml).
 
 Open **Settings → 媒体预览 / Media preview**.
 
+The navigation label and all setting copy follow DSH's active UI language and
+switch live between English and Chinese.
+
 | Setting | Default | Allowed values |
 | --- | --- | --- |
 | Auto-render detected media | On | On / off |

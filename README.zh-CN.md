@@ -95,6 +95,8 @@ dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer
 
 打开 **设置 → 媒体预览 / Media preview**。
 
+导航名称和全部设置文案会跟随 DSH 当前界面语言，在中文与英文之间实时切换。
+
 | 设置项 | 默认值 | 可选范围 |
 | --- | --- | --- |
 | 自动渲染检测到的媒体 | 开启 | 开启 / 关闭 |

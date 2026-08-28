@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2
+
+- Make the settings navigation and all setting copy react live to DSH's
+  English/Chinese UI language through the standard locale slot contract.
+- Add a dependency-free client registration test for both locale dictionaries
+  and the settings locale namespace.
+
 ## 1.0.1
 
 - Publish the plugin as `@wisdoverse/dsh-inline-media-viewer` for one-command

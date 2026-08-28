@@ -542,7 +542,8 @@ window.__ModuleLoader__.load({
         id: "inline-media",
         order: 25,
         label: () => t("nav"),
-        inject: () => ({ scope, t }),
+        locale: SETTINGS_NS,
+        inject: () => ({ scope }),
       }, MediaSettingsSection));
     }
 
