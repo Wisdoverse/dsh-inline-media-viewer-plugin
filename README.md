@@ -54,6 +54,18 @@ audio/sound.mp3                    →  <audio controls>
 
 ## Installation
 
+### From npm
+
+Install and activate the bundle in your Web profile:
+
+```bash
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer
+```
+
+Restart the Web profile after installation.
+
+### From source
+
 1. Clone the plugin into a location available to your Web profile:
 
    ```bash
@@ -66,11 +78,11 @@ audio/sound.mp3                    →  <audio controls>
    ```jsonc
    {
      "dependencies": {
-       "dsh-inline-media-viewer": "link:/path/to/local-plugins/dsh-inline-media-viewer"
+       "@wisdoverse/dsh-inline-media-viewer": "link:/path/to/local-plugins/dsh-inline-media-viewer"
      },
      "dsh": {
        "profile": {
-         "bundles": ["…", "dsh-inline-media-viewer"]
+         "bundles": ["…", "@wisdoverse/dsh-inline-media-viewer"]
        }
      }
    }

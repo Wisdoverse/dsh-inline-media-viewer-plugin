@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1
+
+- Publish the plugin as `@wisdoverse/dsh-inline-media-viewer` for one-command
+  installation through the DSH plugin manager.
+- Align the bundle manifest, package metadata, and bilingual installation
+  documentation with the scoped package name.
+
 ## 1.0.0
 
 - **Initial public release.** Inline image/video/audio previews in the

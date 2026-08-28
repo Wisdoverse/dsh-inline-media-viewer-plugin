@@ -1,3 +1,3 @@
 - insert:
     - id: inline-media-viewer
-      name: dsh-inline-media-viewer
+      name: "@wisdoverse/dsh-inline-media-viewer"

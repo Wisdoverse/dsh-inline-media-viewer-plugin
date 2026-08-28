@@ -53,6 +53,18 @@ audio/sound.mp3                    →  <audio controls>
 
 ## 安装
 
+### 通过 npm 安装
+
+在 Web profile 中安装并启用 Bundle：
+
+```bash
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer
+```
+
+安装后重启 Web profile。
+
+### 从源码安装
+
 1. 将插件克隆到 Web profile 可以访问的位置：
 
    ```bash
@@ -65,11 +77,11 @@ audio/sound.mp3                    →  <audio controls>
    ```jsonc
    {
      "dependencies": {
-       "dsh-inline-media-viewer": "link:/path/to/local-plugins/dsh-inline-media-viewer"
+       "@wisdoverse/dsh-inline-media-viewer": "link:/path/to/local-plugins/dsh-inline-media-viewer"
      },
      "dsh": {
        "profile": {
-         "bundles": ["…", "dsh-inline-media-viewer"]
+         "bundles": ["…", "@wisdoverse/dsh-inline-media-viewer"]
        }
      }
    }

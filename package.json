@@ -1,6 +1,6 @@
 {
-  "name": "dsh-inline-media-viewer",
-  "version": "1.0.0",
+  "name": "@wisdoverse/dsh-inline-media-viewer",
+  "version": "1.0.1",
   "description": "Persistent inline image, video, and audio previews for DeepSeek Harness Web conversations, with workspace-confined local reads and a configurable ComfyUI proxy.",
   "repository": {
     "type": "git",
@@ -23,6 +23,10 @@
     "comfyui"
   ],
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "type": "module",
   "main": "index.js",
   "exports": {
