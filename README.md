@@ -8,7 +8,7 @@
   <a href="CHANGELOG.md"><img alt="Latest tag" src="https://img.shields.io/github/v/tag/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square&amp;label=version"></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square"></a>
   <a href="package.json"><img alt="Top language" src="https://img.shields.io/github/languages/top/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square"></a>
-  <a href="#configuration"><img alt="ComfyUI support" src="https://img.shields.io/badge/ComfyUI-supported-ff6f00?style=flat-square"></a>
+  <a href="#configuration"><img alt="Optional ComfyUI" src="https://img.shields.io/badge/ComfyUI-optional-ff6f00?style=flat-square"></a>
 </p>
 
 <p align="center">
@@ -40,9 +40,14 @@ audio/sound.mp3                    →  <audio controls>
 | --- | --- |
 | Inline rendering | Displays images, videos, and audio directly below the chat turn that mentions them. |
 | Workspace-safe reads | Resolves local paths with `realpath` and rejects traversal, out-of-workspace paths, and symlink escapes. |
-| ComfyUI proxy | Fetches recognized ComfyUI media URLs server-side from the configured origin, including for remote users and HTTPS pages. |
+| Optional ComfyUI proxy | Fetches recognized ComfyUI media URLs server-side from the configured origin, including for remote users and HTTPS pages. |
 | Bounded transfers | Limits each file or response to 48 MiB and remote requests to 20 seconds. |
-| User controls | Provides auto-render, per-turn item limit, media height, and ComfyUI origin settings. |
+| User controls | Provides auto-render, per-turn item limit, media height, and optional ComfyUI origin settings. |
+
+> [!NOTE]
+> ComfyUI is not required. Workspace files and regular HTTP(S) media URLs work
+> when ComfyUI is not installed or running; its proxy is activated only for
+> recognized ComfyUI URLs.
 
 ## Supported media
 
@@ -105,7 +110,7 @@ switch live between English and Chinese.
 | Auto-render detected media | On | On / off |
 | Maximum items per turn | `12` | `1`–`30` |
 | Maximum media height | `380 px` | `160`–`1200 px` |
-| ComfyUI origin | Empty | `http(s)://host[:port]` |
+| ComfyUI origin (optional) | Empty | `http(s)://host[:port]` |
 
 Settings are stored in the DSH settings document. Writes are available only on
 loopback connections; remote browsers can read settings but cannot persist
@@ -113,6 +118,7 @@ changes.
 
 ### ComfyUI origin
 
+- Skip this setting entirely if you do not use ComfyUI.
 - Leave the field empty to use `http://127.0.0.1:8188`.
 - Accepted forms are `http://host[:port]`, `https://host[:port]`, and bare
   `host[:port]` (`http` is assumed).

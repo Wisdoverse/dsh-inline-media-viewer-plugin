@@ -197,6 +197,11 @@ window.__ModuleLoader__.load({
       }
     }
 
+    function mediaTransport(source, comfyUrl) {
+      if (!/^https?:\/\//i.test(source)) return "workspace";
+      return isComfySource(source, comfyUrl) ? "comfy-proxy" : "direct";
+    }
+
     function basename(source) {
       try {
         const url = new URL(source);
@@ -209,7 +214,7 @@ window.__ModuleLoader__.load({
     }
 
     function MediaCard({ candidate, connection, sessionId, imageMaxPx, comfyUrl }) {
-      const proxied = !/^https?:\/\//i.test(candidate.source) || isComfySource(candidate.source, comfyUrl);
+      const proxied = mediaTransport(candidate.source, comfyUrl) !== "direct";
       const [state, setState] = useState(() => proxied
         ? { status: "loading", src: "" }
         : { status: "ready", src: candidate.source });
@@ -385,8 +390,8 @@ window.__ModuleLoader__.load({
         displayCapHint: "1–30",
         imageMaxPx: "媒体最大高度 (px)",
         imageMaxPxHint: "160–1200",
-        comfyUrl: "ComfyUI 地址",
-        comfyUrlHint: "主机代理拉流的服务器地址,格式 http(s)://host[:port];留空使用内置默认地址。",
+        comfyUrl: "ComfyUI 地址（可选）",
+        comfyUrlHint: "仅用于 ComfyUI 链接；不使用 ComfyUI 可保持为空，本地文件和普通网络 URL 不受影响。",
         comfyUrlError: "地址无效,请使用 http://host:8188 这类格式。",
         reset: "恢复默认",
         writable: "当前连接不可回写:设置仅临时保存在本会话,刷新后恢复默认。",
@@ -400,8 +405,8 @@ window.__ModuleLoader__.load({
         displayCapHint: "1–30",
         imageMaxPx: "Max media height (px)",
         imageMaxPxHint: "160–1200",
-        comfyUrl: "ComfyUI address",
-        comfyUrlHint: "Origin the host proxy fetches media from: http(s)://host[:port]; empty uses the built-in default.",
+        comfyUrl: "ComfyUI address (optional)",
+        comfyUrlHint: "Used only for ComfyUI links. Leave empty when not using ComfyUI; local files and regular web URLs work independently.",
         comfyUrlError: "Invalid address; use the http://host:8188 form.",
         reset: "Reset to defaults",
         writable: "This connection cannot write settings: values are session-local until a loopback connection is used.",
@@ -550,6 +555,7 @@ window.__ModuleLoader__.load({
     exports.apply = apply;
     exports.inject = inject;
     exports.name = name;
+    exports.testing = Object.freeze({ mediaTransport });
     return module.exports;
   },
 });

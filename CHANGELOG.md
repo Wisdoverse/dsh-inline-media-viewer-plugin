@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3
+
+- Clarify and enforce the transport split: workspace files use the DSH host,
+  regular HTTP(S) media loads directly, and only recognized ComfyUI URLs use
+  the optional proxy.
+- Mark ComfyUI as optional throughout the bilingual settings UI and README.
+
 ## 1.0.2
 
 - Make the settings navigation and all setting copy react live to DSH's

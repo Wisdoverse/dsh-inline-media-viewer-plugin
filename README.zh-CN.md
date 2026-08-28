@@ -8,7 +8,7 @@
   <a href="CHANGELOG.md"><img alt="最新标签" src="https://img.shields.io/github/v/tag/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square&amp;label=version"></a>
   <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square"></a>
   <a href="package.json"><img alt="主要语言" src="https://img.shields.io/github/languages/top/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square"></a>
-  <a href="#配置"><img alt="支持 ComfyUI" src="https://img.shields.io/badge/ComfyUI-supported-ff6f00?style=flat-square"></a>
+  <a href="#配置"><img alt="可选 ComfyUI" src="https://img.shields.io/badge/ComfyUI-optional-ff6f00?style=flat-square"></a>
 </p>
 
 <p align="center">
@@ -39,9 +39,13 @@ audio/sound.mp3                    →  <audio controls>
 | --- | --- |
 | 内联渲染 | 在提及媒体的聊天消息下方直接显示图像、视频和音频。 |
 | 工作区安全读取 | 使用 `realpath` 解析本地路径，并拒绝目录穿越、工作区外路径和符号链接逃逸。 |
-| ComfyUI 代理 | 由服务端从配置的源站获取识别到的 ComfyUI 媒体 URL，使远程用户和 HTTPS 页面也能正常查看。 |
+| 可选 ComfyUI 代理 | 由服务端从配置的源站获取识别到的 ComfyUI 媒体 URL，使远程用户和 HTTPS 页面也能正常查看。 |
 | 资源限制 | 每个文件或响应最大 48 MiB，远程请求最长 20 秒。 |
-| 用户控制 | 提供自动渲染、每条消息的媒体数量、媒体高度和 ComfyUI 源站设置。 |
+| 用户控制 | 提供自动渲染、每条消息的媒体数量、媒体高度和可选的 ComfyUI 源站设置。 |
+
+> [!NOTE]
+> ComfyUI 不是必需依赖。即使没有安装或运行 ComfyUI，工作区文件和普通 HTTP(S)
+> 媒体 URL 仍可正常使用；只有识别为 ComfyUI 的 URL 才会启用代理。
 
 ## 支持的媒体格式
 
@@ -102,12 +106,13 @@ dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer
 | 自动渲染检测到的媒体 | 开启 | 开启 / 关闭 |
 | 每条消息的最大媒体数量 | `12` | `1`–`30` |
 | 媒体最大高度 | `380 px` | `160`–`1200 px` |
-| ComfyUI 源站 | 留空 | `http(s)://host[:port]` |
+| ComfyUI 源站（可选） | 留空 | `http(s)://host[:port]` |
 
 设置值保存在 DSH 设置文档中。只有回环连接可以写入；远程浏览器可以读取设置，但不能持久化修改。
 
 ### ComfyUI 源站
 
+- 不使用 ComfyUI 时无需配置此项。
 - 留空时使用 `http://127.0.0.1:8188`。
 - 支持 `http://host[:port]`、`https://host[:port]` 和不带协议的
   `host[:port]`（默认使用 `http`）。

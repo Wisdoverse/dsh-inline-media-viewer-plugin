@@ -1,7 +1,7 @@
 {
   "name": "@wisdoverse/dsh-inline-media-viewer",
-  "version": "1.0.2",
-  "description": "Persistent inline image, video, and audio previews for DeepSeek Harness Web conversations, with workspace-confined local reads and a configurable ComfyUI proxy.",
+  "version": "1.0.3",
+  "description": "Persistent inline image, video, and audio previews for DeepSeek Harness Web conversations, with workspace-confined local reads and an optional ComfyUI proxy.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Wisdoverse/dsh-inline-media-viewer-plugin.git"

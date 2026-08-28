@@ -99,6 +99,13 @@ try {
     return react;
   });
 
+  assert.equal(plugin.testing.mediaTransport("outputs/frame.png", ""), "workspace");
+  assert.equal(plugin.testing.mediaTransport("https://cdn.example.com/frame.png", ""), "direct");
+  assert.equal(
+    plugin.testing.mediaTransport("http://127.0.0.1:8188/view?filename=frame.png", ""),
+    "comfy-proxy",
+  );
+
   let activeLocale = "zh";
   let dictionaries;
   const registrations = [];
@@ -140,8 +147,10 @@ try {
   assert.equal(settings.options.locale, "inlineMedia");
   assert.deepEqual(settings.options.inject(), { scope });
   assert.equal(settings.options.label(), "媒体预览");
+  assert.match(dictionaries.zh.comfyUrl, /可选/);
   activeLocale = "en";
   assert.equal(settings.options.label(), "Media preview");
+  assert.match(dictionaries.en.comfyUrl, /optional/i);
 } finally {
   if (previousWindow === undefined) delete globalThis.window;
   else globalThis.window = previousWindow;
