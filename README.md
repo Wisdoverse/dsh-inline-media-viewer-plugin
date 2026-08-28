@@ -1,5 +1,7 @@
 # dsh-inline-media-viewer
 
+English | [简体中文](README.zh-CN.md)
+
 Persistent inline image, video, and audio previews for DeepSeek Harness Web
 conversations. Any media path or media URL mentioned in a chat turn renders
 inline under that turn — no more copying paths out of a log.
