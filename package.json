@@ -2,9 +2,18 @@
   "name": "dsh-inline-media-viewer",
   "version": "1.0.0",
   "description": "Persistent inline image, video, and audio previews for DeepSeek Harness Web conversations, with workspace-confined local reads and a configurable ComfyUI proxy.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wisdoverse/dsh-inline-media-viewer-plugin.git"
+  },
+  "homepage": "https://github.com/Wisdoverse/dsh-inline-media-viewer-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/Wisdoverse/dsh-inline-media-viewer-plugin/issues"
+  },
   "keywords": [
     "deepseek-harness",
     "dsh",
+    "dsh-plugin",
     "web",
     "plugin",
     "media",
@@ -29,6 +38,7 @@
     "client/",
     "cordis.patch.yml",
     "README.md",
+    "README.zh-CN.md",
     "SECURITY.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -37,12 +47,10 @@
     "test": "node test.mjs",
     "lint": "node --check index.js && node --check lib.js && node --check test.mjs"
   },
-  "dependencies": {
-    "@deepseek-ai/dsh-settings": "0.1.1-rc.2",
-    "@deepseek-ai/schemastery": "3.18.1"
-  },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1"
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-settings": "^0.1.1-rc.2",
+    "@deepseek-ai/schemastery": "^3.18.1"
   },
   "dsh": {
     "bundle": {
