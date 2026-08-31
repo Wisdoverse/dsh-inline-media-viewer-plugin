@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4
+
+- Read media candidates from the standard assistant-step projection so the
+  first inline preview renders reliably.
+- Avoid extracting duplicate paths from Markdown links, code spans, and URLs.
+
 ## 1.0.3
 
 - Clarify and enforce the transport split: workspace files use the DSH host,
