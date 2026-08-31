@@ -106,6 +106,24 @@ try {
     "comfy-proxy",
   );
 
+  assert.deepEqual(
+    plugin.testing.extractCandidates(
+      "![poster](/data/dsh/home/xiang test/luke/poster.png)",
+    ),
+    [{ source: "/data/dsh/home/xiang test/luke/poster.png", kind: "image" }],
+  );
+  assert.deepEqual(plugin.testing.selectMedia({
+    seq: 10,
+    turn: {
+      steps: [{
+        data: new Map([["assistant-step", {
+          finalNode: { seq: 10 },
+          blocks: [{ kind: "text", text: "luke/poster.png" }],
+        }]]),
+      }],
+    },
+  }), [{ source: "luke/poster.png", kind: "image" }]);
+
   let activeLocale = "zh";
   let dictionaries;
   const registrations = [];

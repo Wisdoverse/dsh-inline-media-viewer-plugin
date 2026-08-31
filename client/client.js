@@ -9,7 +9,6 @@ window.__ModuleLoader__.load({
     const { createElement: h, useEffect, useMemo, useState } = React;
     const CHANNEL = "/inline-media";
     const ENDPOINT = "read";
-    const DATA_KEY = "inlineMedia";
     const DISPLAY_CAP = 12;
     const SETTINGS_NAMESPACE = "inline-media";
     // Empty config = the host-side built-in default
@@ -88,79 +87,48 @@ window.__ModuleLoader__.load({
         found.push({ source, kind });
       };
 
-      for (const match of text.matchAll(/!?\[[^\]]*\]\(([^)]+)\)/g)) add(match[1]);
-      for (const match of text.matchAll(/`([^`\n]+)`/g)) add(match[1]);
-      for (const match of text.matchAll(/https?:\/\/[^\s<>"'`]+/gi)) add(match[0]);
+      let plain = text.replace(/!?\[[^\]]*\]\(([^)]+)\)/g, (match, source) => {
+        add(source);
+        return " ".repeat(match.length);
+      });
+      plain = plain.replace(/`([^`\n]+)`/g, (match, source) => {
+        add(source);
+        return " ".repeat(match.length);
+      });
+      plain = plain.replace(/https?:\/\/[^\s<>"'`]+/gi, (source) => {
+        add(source);
+        return " ".repeat(source.length);
+      });
 
       const ext = Array.from(MEDIA_EXTENSIONS).join("|");
       const pathPattern = new RegExp(
         String.raw`(?:\/|\.\.?\/|[\w.-]+\/)[^\s<>"'\x60()\[\]{}]+?\.(?:${ext})(?:\?[^\s<>"'\x60]*)?`,
         "gi",
       );
-      for (const match of text.matchAll(pathPattern)) add(match[0]);
+      for (const match of plain.matchAll(pathPattern)) add(match[0]);
       return found;
     }
-
-    function assistantText(event) {
-      if (event.type !== "assistant/message") return "";
-      const content = event.data && event.data.message && event.data.message.content;
-      if (!Array.isArray(content)) return "";
-      return content
-        .filter((block) => block && block.type === "text" && typeof block.text === "string")
-        .map((block) => block.text)
-        .join("\n");
-    }
-
-    const mediaDefinition = {
-      kind: DATA_KEY,
-      match(event) {
-        if (event.type === "turn/start") {
-          return { id: String(event.data.turn), role: "start" };
-        }
-        if (event.type === "assistant/message" && Number.isInteger(event.data && event.data.turn)) {
-          return { id: String(event.data.turn), role: "update" };
-        }
-        return null;
-      },
-      start(_context, match) {
-        return { turn: match.event.data.turn, candidates: [] };
-      },
-      update(context, match) {
-        const additions = extractCandidates(assistantText(match.event)).map((candidate) => ({
-          ...candidate,
-          seq: match.event.seq,
-        }));
-        if (additions.length === 0) return context.state;
-        const seen = new Set(context.state.candidates.map((candidate) => candidate.source));
-        const fresh = additions.filter((candidate) => {
-          if (seen.has(candidate.source)) return false;
-          seen.add(candidate.source);
-          return true;
-        });
-        if (fresh.length === 0) return context.state;
-        return {
-          ...context.state,
-          candidates: [...context.state.candidates, ...fresh].slice(0, DISPLAY_CAP),
-        };
-      },
-      buildLocationData(context, scope) {
-        if (scope !== "turn" || context.state === undefined) return null;
-        return {
-          kind: "turn",
-          turn: context.state.turn,
-          key: DATA_KEY,
-          value: { candidates: context.state.candidates },
-        };
-      },
-    };
 
     function selectMedia(owner) {
       const settings = readSettings();
       if (!settings.autoRender) return null;
-      const data = owner.turn.data.get(DATA_KEY);
-      if (!data || !Array.isArray(data.candidates)) return null;
-      const candidates = data.candidates.filter((candidate) => candidate.seq <= owner.seq);
-      return candidates.length === 0 ? null : candidates.slice(0, settings.displayCap);
+      const candidates = [];
+      const seen = new Set();
+      for (const step of owner.turn.steps) {
+        const assistant = step.data.get("assistant-step");
+        if (!assistant || !assistant.finalNode || assistant.finalNode.seq > owner.seq || !Array.isArray(assistant.blocks)) continue;
+        const text = assistant.blocks
+          .filter((block) => block && block.kind === "text" && typeof block.text === "string")
+          .map((block) => block.text)
+          .join("\n");
+        for (const candidate of extractCandidates(text)) {
+          if (seen.has(candidate.source)) continue;
+          seen.add(candidate.source);
+          candidates.push(candidate);
+          if (candidates.length === settings.displayCap) return candidates;
+        }
+      }
+      return candidates.length === 0 ? null : candidates;
     }
 
     function normalizeComfyOrigin(input) {
@@ -528,7 +496,7 @@ window.__ModuleLoader__.load({
     }
 
     const name = "dsh-inline-media-viewer";
-    const inject = ["slots", "conversationEvents", "connection", "settingsScope", "locale"];
+    const inject = ["slots", "connection", "settingsScope", "locale"];
 
     function apply(ctx) {
       const connection = ctx.get("connection");
@@ -536,7 +504,6 @@ window.__ModuleLoader__.load({
       const t = ctx.locale.bind(SETTINGS_NS);
       const scope = ctx.settingsScope.bind({ namespace: SETTINGS_NAMESPACE });
       settingsScope = scope;
-      ctx.conversationEvents.register(mediaDefinition);
       ctx.slots.inject("conversation.chat.turnTail", () => ctx.slots.register({
         name: "conversation.chat.turnTail",
         select: selectMedia,
@@ -555,7 +522,7 @@ window.__ModuleLoader__.load({
     exports.apply = apply;
     exports.inject = inject;
     exports.name = name;
-    exports.testing = Object.freeze({ mediaTransport });
+    exports.testing = Object.freeze({ extractCandidates, mediaTransport, selectMedia });
     return module.exports;
   },
 });
