@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: "dsh-inline-media-viewer",
+  id: "@wisdoverse/dsh-inline-media-viewer",
   factory: (require) => {
     var module = { exports: {} };
     var exports = module.exports;

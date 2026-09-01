@@ -87,6 +87,7 @@ globalThis.window = {
 try {
   await import(`./client/client.js?localization-test=${Date.now()}`);
   assert.ok(clientBundle);
+  assert.equal(clientBundle.id, "@wisdoverse/dsh-inline-media-viewer");
 
   const react = {
     createElement: () => null,
