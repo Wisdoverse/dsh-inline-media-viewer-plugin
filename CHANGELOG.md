@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5
+
+- Register the browser bundle under the scoped package name expected by the
+  DSH module loader.
+
 ## 1.0.4
 
 - Read media candidates from the standard assistant-step projection so the
