@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.6
+
+- Resolve workspace media from persisted session metadata when a historical
+  conversation is no longer attached to a live host session.
+
 ## 1.0.5
 
 - Register the browser bundle under the scoped package name expected by the

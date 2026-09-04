@@ -20,6 +20,20 @@ assert.equal(testing.isInside("/workspace", "/workspace/out/video.mp4"), true);
 assert.equal(testing.isInside("/workspace", "/workspace-other/video.mp4"), false);
 assert.equal(testing.isInside("/workspace", "/workspace"), true);
 assert.equal(testing.isInside("/workspace", "/workspace/../outside.mp4"), false);
+let historyReads = 0;
+const sessionQuery = {
+  async readSession() {
+    historyReads += 1;
+    return { session: { cwd: "/persisted/workspace" } };
+  },
+};
+assert.equal(
+  await testing.resolveSessionCwd(new Map([["live", { header: { cwd: "/live/workspace" } }]]), sessionQuery, "live"),
+  "/live/workspace",
+);
+assert.equal(historyReads, 0);
+assert.equal(await testing.resolveSessionCwd(new Map(), sessionQuery, "persisted"), "/persisted/workspace");
+assert.equal(historyReads, 1);
 // Default origin: ComfyUI's standard local address; loopback aliases are
 // accepted and rewritten onto it.
 assert.equal(

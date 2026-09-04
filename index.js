@@ -22,12 +22,12 @@ import { isAbsolute, resolve } from "node:path";
 import z from "@deepseek-ai/schemastery";
 import { installSettingsSection, settingsNamespace } from "@deepseek-ai/dsh-settings";
 
-import { COMFY_DEFAULT_ORIGIN, MAX_BYTES, comfyUrl, isInside, mimeOf, normalizeComfyOrigin, testing } from "./lib.js";
+import { COMFY_DEFAULT_ORIGIN, MAX_BYTES, comfyUrl, isInside, mimeOf, normalizeComfyOrigin, resolveSessionCwd, testing } from "./lib.js";
 
 export { testing } from "./lib.js";
 
 export const name = "dsh-inline-media-viewer";
-export const inject = ["connection", "sessions", "settings"];
+export const inject = ["connection", "sessions", "sessionQuery", "settings"];
 
 const CHANNEL = "/inline-media";
 const ENDPOINT = "read";
@@ -119,8 +119,7 @@ async function readRemote(source, signal, settingsValue) {
 }
 
 async function readLocal(ctx, source, sessionId) {
-  const session = ctx.sessions.get(sessionId);
-  const cwd = session?.header?.cwd;
+  const cwd = await resolveSessionCwd(ctx.sessions, ctx.sessionQuery, sessionId);
   if (!cwd) throw new Error("session working directory is unavailable");
   const mime = mimeOf(source);
   if (!mime) throw new Error("unsupported media extension");

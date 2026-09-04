@@ -1,5 +1,5 @@
 /**
- * dsh-inline-media-viewer — pure helpers.
+ * dsh-inline-media-viewer — dependency-free helpers.
  *
  * This module has NO runtime dependencies: unit tests and reviewers can import
  * it anywhere. Integration concerns (RPC channel, settings registration) live
@@ -77,6 +77,11 @@ export function mimeOf(source) {
 export function isInside(root, target) {
   const rel = relative(root, target);
   return rel === "" || (!isAbsolute(rel) && rel !== ".." && !rel.startsWith(`..${sep}`));
+}
+
+export async function resolveSessionCwd(sessions, sessionQuery, sessionId) {
+  const live = sessions.get(sessionId);
+  return live ? live.header.cwd : (await sessionQuery.readSession(sessionId)).session.cwd;
 }
 
 /**
@@ -175,4 +180,5 @@ export const testing = Object.freeze({
   isInside,
   mimeOf,
   normalizeComfyOrigin,
+  resolveSessionCwd,
 });
