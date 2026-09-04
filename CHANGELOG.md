@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.8
+
+- Preserve output-directory context across assistant steps in one turn, so a
+  later final answer containing only media filenames still renders previews.
+
 ## 1.0.7
 
 - Resolve backticked media filenames against a preceding backticked directory,

@@ -147,6 +147,24 @@ try {
       }],
     },
   }), [{ source: "luke/poster.png", kind: "image" }]);
+  assert.deepEqual(plugin.testing.selectMedia({
+    seq: 20,
+    turn: {
+      steps: [
+        { data: new Map([["assistant-step", {
+          finalNode: { seq: 19 },
+          blocks: [{ kind: "text", text: "Saved in `/data/dsh/home/Linch/output/`." }],
+        }]]) },
+        { data: new Map([["assistant-step", {
+          finalNode: { seq: 20 },
+          blocks: [{ kind: "text", text: "Files: `00_three_views.png`, `01_front_view.png`." }],
+        }]]) },
+      ],
+    },
+  }), [
+    { source: "/data/dsh/home/Linch/output/00_three_views.png", kind: "image" },
+    { source: "/data/dsh/home/Linch/output/01_front_view.png", kind: "image" },
+  ]);
 
   let activeLocale = "zh";
   let dictionaries;

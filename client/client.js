@@ -115,22 +115,15 @@ window.__ModuleLoader__.load({
     function selectMedia(owner) {
       const settings = readSettings();
       if (!settings.autoRender) return null;
-      const candidates = [];
-      const seen = new Set();
+      const text = [];
       for (const step of owner.turn.steps) {
         const assistant = step.data.get("assistant-step");
         if (!assistant || !assistant.finalNode || assistant.finalNode.seq > owner.seq || !Array.isArray(assistant.blocks)) continue;
-        const text = assistant.blocks
+        text.push(...assistant.blocks
           .filter((block) => block && block.kind === "text" && typeof block.text === "string")
-          .map((block) => block.text)
-          .join("\n");
-        for (const candidate of extractCandidates(text)) {
-          if (seen.has(candidate.source)) continue;
-          seen.add(candidate.source);
-          candidates.push(candidate);
-          if (candidates.length === settings.displayCap) return candidates;
-        }
+          .map((block) => block.text));
       }
+      const candidates = extractCandidates(text.join("\n")).slice(0, settings.displayCap);
       return candidates.length === 0 ? null : candidates;
     }
 
