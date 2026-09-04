@@ -127,6 +127,15 @@ try {
     ),
     [{ source: "/data/dsh/home/xiang test/luke/poster.png", kind: "image" }],
   );
+  assert.deepEqual(
+    plugin.testing.extractCandidates(
+      "Outputs are in `/data/dsh/home/Linch/output/`: `00_three_views.png` and `01_front_view.png`.",
+    ),
+    [
+      { source: "/data/dsh/home/Linch/output/00_three_views.png", kind: "image" },
+      { source: "/data/dsh/home/Linch/output/01_front_view.png", kind: "image" },
+    ],
+  );
   assert.deepEqual(plugin.testing.selectMedia({
     seq: 10,
     turn: {

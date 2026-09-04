@@ -79,6 +79,7 @@ window.__ModuleLoader__.load({
     function extractCandidates(text) {
       const found = [];
       const seen = new Set();
+      let directory = "";
       const add = (raw) => {
         const source = cleanCandidate(raw);
         const kind = mediaKind(source);
@@ -92,7 +93,9 @@ window.__ModuleLoader__.load({
         return " ".repeat(match.length);
       });
       plain = plain.replace(/`([^`\n]+)`/g, (match, source) => {
-        add(source);
+        const value = cleanCandidate(source);
+        if (/[/\\]$/.test(value)) directory = value;
+        else add(directory && !/[/\\]/.test(value) ? `${directory}${value}` : value);
         return " ".repeat(match.length);
       });
       plain = plain.replace(/https?:\/\/[^\s<>"'`]+/gi, (source) => {

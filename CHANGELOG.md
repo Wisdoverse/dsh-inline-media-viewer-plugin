@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.7
+
+- Resolve backticked media filenames against a preceding backticked directory,
+  matching the common "output directory plus file list" response format.
+
 ## 1.0.6
 
 - Resolve workspace media from persisted session metadata when a historical
