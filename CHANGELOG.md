@@ -1,14 +1,21 @@
 # Changelog
 
-## 1.0.8
+## 1.0.9
+
+- Collect media paths from tool-call arguments as well as the assistant's final
+  text, so every image read during a turn remains available in its preview.
+
+## 1.0.8 (deprecated)
 
 - Preserve output-directory context across assistant steps in one turn, so a
   later final answer containing only media filenames still renders previews.
+- Superseded by 1.0.9 because tool-call-only media references were not retained.
 
-## 1.0.7
+## 1.0.7 (deprecated)
 
 - Resolve backticked media filenames against a preceding backticked directory,
   matching the common "output directory plus file list" response format.
+- Superseded by 1.0.9 because it only inspected assistant text.
 
 ## 1.0.6
 

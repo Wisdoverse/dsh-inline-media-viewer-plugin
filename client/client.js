@@ -80,6 +80,11 @@ window.__ModuleLoader__.load({
       const found = [];
       const seen = new Set();
       let directory = "";
+      const ext = Array.from(MEDIA_EXTENSIONS).join("|");
+      const directories = new Set(Array.from(text.matchAll(
+        /[`'"]((?:\/|\.\.?\/|[\w.-]+\/)[^`'"\n]*[\/\\])[`'"]/g,
+      ), (match) => cleanCandidate(match[1])));
+      const soleDirectory = directories.size === 1 ? directories.values().next().value : "";
       const add = (raw) => {
         const source = cleanCandidate(raw);
         const kind = mediaKind(source);
@@ -95,7 +100,10 @@ window.__ModuleLoader__.load({
       plain = plain.replace(/`([^`\n]+)`/g, (match, source) => {
         const value = cleanCandidate(source);
         if (/[/\\]$/.test(value)) directory = value;
-        else add(directory && !/[/\\]/.test(value) ? `${directory}${value}` : value);
+        else {
+          const base = directory || soleDirectory;
+          add(base && !/[/\\]/.test(value) ? `${base}${value}` : value);
+        }
         return " ".repeat(match.length);
       });
       plain = plain.replace(/https?:\/\/[^\s<>"'`]+/gi, (source) => {
@@ -103,7 +111,11 @@ window.__ModuleLoader__.load({
         return " ".repeat(source.length);
       });
 
-      const ext = Array.from(MEDIA_EXTENSIONS).join("|");
+      if (soleDirectory) {
+        const filenamePattern = new RegExp(String.raw`[\x60'"]([^\x60'"/\\\n]+\.(?:${ext})(?:\?[^\x60'"\s]*)?)[\x60'"]`, "gi");
+        for (const match of text.matchAll(filenamePattern)) add(`${soleDirectory}${match[1]}`);
+      }
+
       const pathPattern = new RegExp(
         String.raw`(?:\/|\.\.?\/|[\w.-]+\/)[^\s<>"'\x60()\[\]{}]+?\.(?:${ext})(?:\?[^\s<>"'\x60]*)?`,
         "gi",
@@ -112,10 +124,48 @@ window.__ModuleLoader__.load({
       return found;
     }
 
+    function toolArgumentText(raw) {
+      try {
+        const text = [];
+        const visit = (value) => {
+          if (typeof value === "string") text.push(value);
+          else if (value && typeof value === "object") Object.values(value).forEach(visit);
+        };
+        visit(JSON.parse(raw));
+        return text.join("\n");
+      } catch (_error) {
+        return raw;
+      }
+    }
+
+    const mediaMentionsDefinition = {
+      kind: "inline-media-mentions",
+      match: (event) => {
+        if (event.type === "turn/start") return { id: String(event.data.turn), role: "start" };
+        if (event.type === "tool/call") return { id: String(event.data.turn), role: "update" };
+        return null;
+      },
+      start: (_context, match) => ({ turn: match.event.data.turn, texts: [] }),
+      update: (context, match) => typeof match.event.data.arguments !== "string" ? context.state : {
+        ...context.state,
+        texts: [...context.state.texts, { seq: match.event.seq, text: toolArgumentText(match.event.data.arguments) }],
+      },
+      buildLocationData: (context, scope) => scope !== "turn" || context.state === undefined ? null : {
+        kind: "turn",
+        turn: context.state.turn,
+        key: "inline-media-mentions",
+        value: { texts: context.state.texts },
+      },
+    };
+
     function selectMedia(owner) {
       const settings = readSettings();
       if (!settings.autoRender) return null;
       const text = [];
+      const mentions = owner.turn.data && owner.turn.data.get("inline-media-mentions");
+      if (mentions) {
+        text.push(...mentions.texts.filter((entry) => entry.seq <= owner.seq).map((entry) => entry.text));
+      }
       for (const step of owner.turn.steps) {
         const assistant = step.data.get("assistant-step");
         if (!assistant || !assistant.finalNode || assistant.finalNode.seq > owner.seq || !Array.isArray(assistant.blocks)) continue;
@@ -492,10 +542,11 @@ window.__ModuleLoader__.load({
     }
 
     const name = "dsh-inline-media-viewer";
-    const inject = ["slots", "connection", "settingsScope", "locale"];
+    const inject = ["slots", "connection", "settingsScope", "locale", "conversationEvents"];
 
     function apply(ctx) {
       const connection = ctx.get("connection");
+      ctx.conversationEvents.register(mediaMentionsDefinition);
       ctx.effect(() => ctx.locale.register(SETTINGS_NS, SETTINGS_DICT), "inline-media: dictionaries");
       const t = ctx.locale.bind(SETTINGS_NS);
       const scope = ctx.settingsScope.bind({ namespace: SETTINGS_NAMESPACE });
@@ -518,7 +569,7 @@ window.__ModuleLoader__.load({
     exports.apply = apply;
     exports.inject = inject;
     exports.name = name;
-    exports.testing = Object.freeze({ extractCandidates, mediaTransport, selectMedia });
+    exports.testing = Object.freeze({ extractCandidates, mediaMentionsDefinition, mediaTransport, selectMedia, toolArgumentText });
     return module.exports;
   },
 });

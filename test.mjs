@@ -113,6 +113,7 @@ try {
     assert.equal(name, "react");
     return react;
   });
+  assert.ok(plugin.inject.includes("conversationEvents"));
 
   assert.equal(plugin.testing.mediaTransport("outputs/frame.png", ""), "workspace");
   assert.equal(plugin.testing.mediaTransport("https://cdn.example.com/frame.png", ""), "direct");
@@ -165,6 +166,34 @@ try {
     { source: "/data/dsh/home/Linch/output/00_three_views.png", kind: "image" },
     { source: "/data/dsh/home/Linch/output/01_front_view.png", kind: "image" },
   ]);
+  const realToolCalls = [
+    String.raw`{"code":"const files = [\"00_three_views.png\",\"01_front_view.png\",\"02_back_view.png\",\"03_side_view.png\"]; for (const f of files) await tools.read_image({ file_path: \"/data/dsh/home/Linch/output/\" + f });"}`,
+    String.raw`{"code":"const files = [\"04_scene_lanyard.png\",\"05_scene_magnet_snap.png\",\"06_scene_desk_clock.png\",\"07_scene_wheel_click.png\"]; for (const f of files) await tools.read_image({ file_path: \"/data/dsh/home/Linch/output/\" + f });"}`,
+  ];
+  const mentionsDefinition = plugin.testing.mediaMentionsDefinition;
+  let mentionsState = mentionsDefinition.start({}, {
+    event: { type: "turn/start", data: { turn: 5 } },
+  });
+  for (const [index, argumentsRaw] of realToolCalls.entries()) {
+    mentionsState = mentionsDefinition.update({ state: mentionsState }, {
+      event: { type: "tool/call", seq: 10 + index, data: { turn: 5, arguments: argumentsRaw } },
+    });
+  }
+  const mentionsLocation = mentionsDefinition.buildLocationData({ state: mentionsState }, "turn");
+  assert.equal(mentionsLocation.key, "inline-media-mentions");
+  assert.deepEqual(plugin.testing.selectMedia({
+    seq: 30,
+    turn: {
+      data: { get: (key) => key === "inline-media-mentions" ? mentionsLocation.value : undefined },
+      steps: [{ data: new Map([["assistant-step", {
+        finalNode: { seq: 30 },
+        blocks: [{ kind: "text", text: "三视图（`00_three_views.png`）与四张场景图。" }],
+      }]]) }],
+    },
+  }), [
+    "00_three_views.png", "01_front_view.png", "02_back_view.png", "03_side_view.png",
+    "04_scene_lanyard.png", "05_scene_magnet_snap.png", "06_scene_desk_clock.png", "07_scene_wheel_click.png",
+  ].map((filename) => ({ source: `/data/dsh/home/Linch/output/${filename}`, kind: "image" })));
 
   let activeLocale = "zh";
   let dictionaries;
