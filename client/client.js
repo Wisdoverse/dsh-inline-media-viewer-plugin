@@ -542,11 +542,11 @@ window.__ModuleLoader__.load({
     }
 
     const name = "dsh-inline-media-viewer";
-    const inject = ["slots", "connection", "settingsScope", "locale", "conversationEvents"];
+    const inject = ["slots", "connection", "settingsScope", "locale", "uiConversation"];
 
     function apply(ctx) {
       const connection = ctx.get("connection");
-      ctx.conversationEvents.register(mediaMentionsDefinition);
+      ctx.uiConversation.events.register(mediaMentionsDefinition);
       ctx.effect(() => ctx.locale.register(SETTINGS_NS, SETTINGS_DICT), "inline-media: dictionaries");
       const t = ctx.locale.bind(SETTINGS_NS);
       const scope = ctx.settingsScope.bind({ namespace: SETTINGS_NAMESPACE });

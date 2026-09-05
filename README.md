@@ -59,12 +59,14 @@ audio/sound.mp3                    →  <audio controls>
 
 ## Installation
 
+Targets DSH **v0.1.3-alpha.1**. For older DSH versions, use plugin **1.0.9**.
+
 ### From npm
 
 Install and activate the bundle in your Web profile:
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.10-alpha.1
 ```
 
 Restart the Web profile after installation.

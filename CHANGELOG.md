@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.10-alpha.1
+
+- Adapt to DSH v0.1.3-alpha.1: register host settings through `settings.register`,
+  register client projections through `uiConversation.events`, and use the
+  authenticated two-argument RPC registration contract.
+- Remove the unused settings package peer dependency; consume the host-provided
+  settings service and add a real-dependency host registration check.
+
 ## 1.0.9
 
 - Collect media paths from tool-call arguments as well as the assistant's final

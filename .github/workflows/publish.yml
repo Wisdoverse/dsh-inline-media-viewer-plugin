@@ -37,5 +37,18 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Install host dependencies
+        run: npm install --ignore-scripts --package-lock=false
+
+      - name: Verify host registration
+        run: npm run test:host
+
       - name: Publish package
-        run: npm publish --access public
+        shell: bash
+        run: |
+          package_version="$(node -p "require('./package.json').version")"
+          if [[ "$package_version" == *-* ]]; then
+            npm publish --access public --tag alpha
+          else
+            npm publish --access public --tag latest
+          fi

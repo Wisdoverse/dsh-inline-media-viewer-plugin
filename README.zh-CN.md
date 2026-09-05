@@ -57,12 +57,14 @@ audio/sound.mp3                    →  <audio controls>
 
 ## 安装
 
+适配 DSH **v0.1.3-alpha.1**；旧版 DSH 请使用插件 **1.0.9**。
+
 ### 通过 npm 安装
 
 在 Web profile 中安装并启用 Bundle：
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.10-alpha.1
 ```
 
 安装后重启 Web profile。

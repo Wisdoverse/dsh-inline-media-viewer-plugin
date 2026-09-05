@@ -113,7 +113,7 @@ try {
     assert.equal(name, "react");
     return react;
   });
-  assert.ok(plugin.inject.includes("conversationEvents"));
+  assert.ok(plugin.inject.includes("uiConversation"));
 
   assert.equal(plugin.testing.mediaTransport("outputs/frame.png", ""), "workspace");
   assert.equal(plugin.testing.mediaTransport("https://cdn.example.com/frame.png", ""), "direct");
@@ -200,7 +200,9 @@ try {
   const registrations = [];
   const scope = { id: "settings-scope" };
   const ctx = {
-    conversationEvents: { register: () => undefined },
+    uiConversation: { events: { register: (definition) => {
+      assert.equal(definition, mentionsDefinition);
+    } } },
     effect: (setup) => setup(),
     get: (name) => {
       assert.equal(name, "connection");
@@ -243,6 +245,42 @@ try {
 } finally {
   if (previousWindow === undefined) delete globalThis.window;
   else globalThis.window = previousWindow;
+}
+
+// Optional real-dependency smoke check for the v0.1.3 host contract.
+if (process.argv.includes("--host")) {
+  const { apply, MEDIA_SETTINGS_DEFAULTS, MEDIA_SETTINGS_NAMESPACE } = await import("./index.js");
+  let handler;
+  let disposed = false;
+  const effects = [];
+  const settings = { ...MEDIA_SETTINGS_DEFAULTS, comfyUrl: "invalid/path" };
+  apply({
+    settings: {
+      register(namespace, schema, options) {
+        assert.equal(namespace, MEDIA_SETTINGS_NAMESPACE);
+        assert.deepEqual(schema(options.base), MEDIA_SETTINGS_DEFAULTS);
+        return { get: () => settings };
+      },
+    },
+    connection: { rpc: { handle(...args) {
+      assert.equal(args.length, 2);
+      assert.equal(args[0], "/inline-media");
+      handler = args[1];
+      return async () => { disposed = true; };
+    } } },
+    effect: (setup) => effects.push(setup()),
+    sessions: new Map(),
+    sessionQuery,
+  });
+  const signal = new AbortController().signal;
+  assert.equal((await handler("unknown", {}, signal)).ok, false);
+  assert.equal((await handler("read", { source: "a.png", sessionId: "" }, signal)).ok, false);
+  const request = { source: "http://localhost:8188/view?filename=a.png", sessionId: "live" };
+  assert.match((await handler("read", request, signal)).error.message, /configured ComfyUI address is invalid/);
+  settings.comfyUrl = "";
+  assert.match((await handler("read", { ...request, source: "https://example.com/a.png" }, signal)).error.message, /not an allowed ComfyUI/);
+  for (const dispose of effects) dispose();
+  assert.equal(disposed, true);
 }
 
 console.log("dsh-inline-media-viewer tests passed");

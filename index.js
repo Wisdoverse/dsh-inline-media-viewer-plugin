@@ -20,7 +20,6 @@
 import { readFile, realpath, stat } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
 import z from "@deepseek-ai/schemastery";
-import { installSettingsSection, settingsNamespace } from "@deepseek-ai/dsh-settings";
 
 import { COMFY_DEFAULT_ORIGIN, MAX_BYTES, comfyUrl, isInside, mimeOf, normalizeComfyOrigin, resolveSessionCwd, testing } from "./lib.js";
 
@@ -33,7 +32,7 @@ const CHANNEL = "/inline-media";
 const ENDPOINT = "read";
 
 /** Persistent user settings namespace for this plugin. */
-export const MEDIA_SETTINGS_NAMESPACE = settingsNamespace("inline-media");
+export const MEDIA_SETTINGS_NAMESPACE = "inline-media";
 
 /** Schema of the user settings section. */
 export const MEDIA_SETTINGS_SCHEMA = z.object({
@@ -157,28 +156,19 @@ async function handleRead(ctx, endpoint, payload, signal, resolveSettings) {
 }
 
 export function apply(ctx) {
-  let resolveSettings = () => MEDIA_SETTINGS_DEFAULTS;
+  const settings = ctx.settings.register(MEDIA_SETTINGS_NAMESPACE, MEDIA_SETTINGS_SCHEMA, {
+    base: MEDIA_SETTINGS_DEFAULTS,
+  });
+  const resolveSettings = () => settings.get();
   ctx.effect(() => {
     const dispose = ctx.connection.rpc.handle(
       CHANNEL,
       (endpoint, payload, signal) => handleRead(ctx, endpoint, payload, signal, resolveSettings),
-      { authority: "trusted-host" },
     );
     return () => {
       void dispose();
     };
   }, "inline-media: rpc");
-
-  // Register the user settings namespace (defaults + schema). The client reads
-  // and writes this section through the settings mirror. autoRender /
-  // displayCap / imageMaxPx are consumed client-side; comfyUrl is read here,
-  // per request, to decide which remote URLs to proxy and where to fetch them.
-  installSettingsSection(ctx, MEDIA_SETTINGS_NAMESPACE, MEDIA_SETTINGS_SCHEMA, MEDIA_SETTINGS_DEFAULTS, {
-    setSource: (source) => {
-      resolveSettings = source;
-    },
-    onChange: () => {},
-  });
 }
 
 export { MIME } from "./lib.js";
