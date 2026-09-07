@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.10
+
+- Promote 1.0.10-alpha.1 to the stable release without runtime changes.
+- Verify plugin import and host startup on DSH v0.1.2-rc.1; retain the v0.1.3-alpha.1 API adaptation.
+- Browser media playback and the final DSH v0.1.3 release have not been verified.
+
 ## 1.0.10-alpha.1
 
 - Adapt to DSH v0.1.3-alpha.1: register host settings through `settings.register`,
