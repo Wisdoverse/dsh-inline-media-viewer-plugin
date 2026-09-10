@@ -160,15 +160,17 @@ export function apply(ctx) {
     base: MEDIA_SETTINGS_DEFAULTS,
   });
   const resolveSettings = () => settings.get();
-  ctx.effect(() => {
-    const dispose = ctx.connection.rpc.handle(
-      CHANNEL,
-      (endpoint, payload, signal) => handleRead(ctx, endpoint, payload, signal, resolveSettings),
-    );
-    return () => {
-      void dispose();
-    };
-  }, "inline-media: rpc");
+  ctx.inject(["connection"], (connectionCtx) => {
+    connectionCtx.effect(() => {
+      const dispose = connectionCtx.connection.rpc.handle(
+        CHANNEL,
+        (endpoint, payload, signal) => handleRead(ctx, endpoint, payload, signal, resolveSettings),
+      );
+      return () => {
+        void dispose();
+      };
+    }, "inline-media: rpc");
+  });
 }
 
 export { MIME } from "./lib.js";

@@ -254,7 +254,7 @@ if (process.argv.includes("--host")) {
   let disposed = false;
   const effects = [];
   const settings = { ...MEDIA_SETTINGS_DEFAULTS, comfyUrl: "invalid/path" };
-  apply({
+  const hostCtx = {
     settings: {
       register(namespace, schema, options) {
         assert.equal(namespace, MEDIA_SETTINGS_NAMESPACE);
@@ -269,9 +269,14 @@ if (process.argv.includes("--host")) {
       return async () => { disposed = true; };
     } } },
     effect: (setup) => effects.push(setup()),
+    inject: (services, setup) => {
+      assert.deepEqual(services, ["connection"]);
+      setup(hostCtx);
+    },
     sessions: new Map(),
     sessionQuery,
-  });
+  };
+  apply(hostCtx);
   const signal = new AbortController().signal;
   assert.equal((await handler("unknown", {}, signal)).ok, false);
   assert.equal((await handler("read", { source: "a.png", sessionId: "" }, signal)).ok, false);

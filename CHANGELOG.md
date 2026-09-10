@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.11
+
+- Register the authenticated RPC route inside a connection-injected context so
+  Cordis can provide the Web server dependency during deferred setup.
+- Verify host startup, the settings section, and HTTP health on DSH v0.1.5-rc.1.
+
 ## 1.0.10
 
 - Promote 1.0.10-alpha.1 to the stable release without runtime changes.
