@@ -104,7 +104,7 @@ try {
   assert.equal(clientBundle.id, "@wisdoverse/dsh-inline-media-viewer");
 
   const react = {
-    createElement: () => null,
+    createElement: (type, props) => ({ type, props }),
     useEffect: () => undefined,
     useMemo: (factory) => factory(),
     useState: (initial) => [initial, () => undefined],
@@ -114,6 +114,18 @@ try {
     return react;
   });
   assert.ok(plugin.inject.includes("uiConversation"));
+  const remotePreferences = { autoRender: false, displayCap: 4, imageMaxPx: 240, comfyUrl: "http://comfy.example.com:8188" };
+  assert.deepEqual(plugin.testing.readSettings(remotePreferences), remotePreferences);
+  let remoteReads = 0;
+  const remoteConnection = { rpc: { call: async (channel, endpoint) => {
+    assert.equal(channel, "/api");
+    assert.equal(endpoint, "inline-media.settings");
+    remoteReads += 1;
+    return { ok: true, value: remotePreferences };
+  } } };
+  assert.deepEqual(await plugin.testing.fetchRemoteSettings(remoteConnection), remotePreferences);
+  assert.deepEqual(await plugin.testing.fetchRemoteSettings(remoteConnection), remotePreferences);
+  assert.equal(remoteReads, 1);
 
   assert.equal(plugin.testing.mediaTransport("outputs/frame.png", ""), "workspace");
   assert.equal(plugin.testing.mediaTransport("https://cdn.example.com/frame.png", ""), "direct");
@@ -198,7 +210,10 @@ try {
   let activeLocale = "zh";
   let dictionaries;
   const registrations = [];
-  const scope = { id: "settings-scope" };
+  const form = {
+    getSnapshot: () => ({ value: { autoRender: true }, writable: true }),
+    subscribe: () => () => undefined,
+  };
   const ctx = {
     uiConversation: { events: { register: (definition) => {
       assert.equal(definition, mentionsDefinition);
@@ -219,7 +234,10 @@ try {
         return () => undefined;
       },
     },
-    settingsScope: { bind: () => scope },
+    configForms: { get: (id) => {
+      assert.equal(id, "inline-media");
+      return form;
+    } },
     slots: {
       inject: (_name, setup) => setup(),
       register: (options, component) => {
@@ -230,13 +248,23 @@ try {
   };
 
   plugin.apply(ctx);
+  assert.ok(plugin.inject.includes("configForms"));
+  assert.equal(registrations.find(({ options }) => options.name === "conversation.chat.turnTail").options.id, "inline-media");
+  const mediaTail = registrations.find(({ options }) => options.name === "conversation.chat.turnTail").component;
+  const rendered = mediaTail({
+    seq: 10,
+    turn: { data: new Map(), steps: [{ data: new Map([["assistant-step", {
+      finalNode: { seq: 10 }, blocks: [{ kind: "text", text: "![preview](test.png)" }],
+    }]]) }] },
+  });
+  assert.deepEqual(rendered.props.matched, [{ source: "test.png", kind: "image" }]);
   assert.deepEqual(Object.keys(dictionaries).sort(), ["en", "zh"]);
   assert.deepEqual(Object.keys(dictionaries.en).sort(), Object.keys(dictionaries.zh).sort());
 
   const settings = registrations.find(({ options }) => options.name === "settings.section");
   assert.ok(settings);
   assert.equal(settings.options.locale, "inlineMedia");
-  assert.deepEqual(settings.options.inject(), { scope });
+  assert.deepEqual(settings.options.inject(), { form, connection: { id: "connection" } });
   assert.equal(settings.options.label(), "媒体预览");
   assert.match(dictionaries.zh.comfyUrl, /可选/);
   activeLocale = "en";
@@ -247,26 +275,28 @@ try {
   else globalThis.window = previousWindow;
 }
 
-// Optional real-dependency smoke check for the v0.1.3 host contract.
+// Optional real-dependency smoke check for the v0.1.7 host contract.
 if (process.argv.includes("--host")) {
-  const { apply, MEDIA_SETTINGS_DEFAULTS, MEDIA_SETTINGS_NAMESPACE } = await import("./index.js");
-  let handler;
-  let disposed = false;
+  const { apply, Config, MEDIA_SETTINGS_DEFAULTS } = await import("./index.js");
+  assert.deepEqual(Object.fromEntries(Object.entries(Config({})).map(([field, value]) =>
+    [field, value.get()])), MEDIA_SETTINGS_DEFAULTS);
+  assert.throws(() => Config({ displayCap: 0 }));
+  const routes = new Map();
+  let settingsDisposed = false;
   const effects = [];
   const settings = { ...MEDIA_SETTINGS_DEFAULTS, comfyUrl: "invalid/path" };
   const hostCtx = {
+    fiber: {},
     settings: {
-      register(namespace, schema, options) {
-        assert.equal(namespace, MEDIA_SETTINGS_NAMESPACE);
-        assert.deepEqual(schema(options.base), MEDIA_SETTINGS_DEFAULTS);
-        return { get: () => settings };
+      configure(options, owner) {
+        assert.deepEqual(options, { auto: false });
+        assert.equal(owner, hostCtx.fiber);
+        return () => { settingsDisposed = true; };
       },
     },
-    connection: { rpc: { handle(...args) {
-      assert.equal(args.length, 2);
-      assert.equal(args[0], "/inline-media");
-      handler = args[1];
-      return async () => { disposed = true; };
+    connection: { fetch: { register: (route) => {
+      routes.set(route.path, route);
+      return () => routes.delete(route.path);
     } } },
     effect: (setup) => effects.push(setup()),
     inject: (services, setup) => {
@@ -276,16 +306,26 @@ if (process.argv.includes("--host")) {
     sessions: new Map(),
     sessionQuery,
   };
-  apply(hostCtx);
-  const signal = new AbortController().signal;
-  assert.equal((await handler("unknown", {}, signal)).ok, false);
-  assert.equal((await handler("read", { source: "a.png", sessionId: "" }, signal)).ok, false);
+  apply(hostCtx, Object.fromEntries(Object.keys(MEDIA_SETTINGS_DEFAULTS).map((field) =>
+    [field, { get: () => settings[field] }])));
+  const call = async (endpoint, payload) => {
+    const route = routes.get(`/api/inline-media.${endpoint}`);
+    assert.ok(route);
+    const response = await route.fetch(new Request(`http://localhost${route.path}`, {
+      method: "POST",
+      body: JSON.stringify({ type: "client-request", rpcId: "test", method: `inline-media.${endpoint}`, payload }),
+    }));
+    return (await response.json()).result;
+  };
+  assert.deepEqual((await call("settings", {})).value, settings);
+  assert.equal((await call("read", { source: "a.png", sessionId: "" })).ok, false);
   const request = { source: "http://localhost:8188/view?filename=a.png", sessionId: "live" };
-  assert.match((await handler("read", request, signal)).error.message, /configured ComfyUI address is invalid/);
+  assert.match((await call("read", request)).error.message, /configured ComfyUI address is invalid/);
   settings.comfyUrl = "";
-  assert.match((await handler("read", { ...request, source: "https://example.com/a.png" }, signal)).error.message, /not an allowed ComfyUI/);
+  assert.match((await call("read", { ...request, source: "https://example.com/a.png" })).error.message, /not an allowed ComfyUI/);
   for (const dispose of effects) dispose();
-  assert.equal(disposed, true);
+  assert.equal(routes.size, 0);
+  assert.equal(settingsDisposed, true);
 }
 
 console.log("dsh-inline-media-viewer tests passed");

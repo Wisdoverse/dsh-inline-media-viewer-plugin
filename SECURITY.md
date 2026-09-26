@@ -39,9 +39,8 @@ exfiltration, no arbitrary SSRF, no unbounded memory use.
 
 ## Transport
 
-- The media channel `/inline-media/read` is registered with the DSH
-  connection service (`authority: "trusted-host"`), so it runs under the same
-  browser-trust fence and session gating as DSH's own RPC surface.
+- The media route `/api/inline-media.read` uses DSH's authenticated `/api`
+  bridge and browser-trust fence.
 - The client renderer never receives file system paths back — only `data:`
   URLs — so a hostile session cannot use the channel as a file oracle for
   paths the UI already knows.
@@ -53,6 +52,8 @@ exfiltration, no arbitrary SSRF, no unbounded memory use.
   comfyUrl string ≤ 512 chars, parsed to a bare origin at use time).
 - The settings service only writes back for **loopback** connections; remote
   browsers are read-only, so a remote viewer cannot persist state.
+- The plugin's authenticated `settings` RPC returns only its four non-secret
+  display and ComfyUI preferences to remote browsers.
 
 ## Known limitations
 
