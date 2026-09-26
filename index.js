@@ -1,13 +1,12 @@
 /**
  * dsh-inline-media-viewer — host half.
  *
- * Serves media bytes for the web client over a dedicated RPC channel
- * (`/inline-media/read`), reading workspace-local files under the calling
+ * Serves media bytes for the web client over authenticated DSH API routes
+ * (`/api/inline-media.read`), reading workspace-local files under the calling
  * session's workspace root and proxying ComfyUI media URLs onto the
  * user-configured ComfyUI origin (default: `http://127.0.0.1:8188`,
- * ComfyUI's standard local address). Registers a persistent user settings
- * namespace (`inline-media`) so the client can tune display preferences
- * and the ComfyUI server address.
+ * ComfyUI's standard local address). Its live Config fields are edited
+ * through DSH's configuration forms.
  *
  * Security model (see SECURITY.md): local reads are confined to the session
  * workspace (realpath + containment), remote reads always fetch from the
@@ -28,19 +27,10 @@ export { testing } from "./lib.js";
 export const name = "dsh-inline-media-viewer";
 export const inject = ["connection", "sessions", "sessionQuery", "settings"];
 
-const CHANNEL = "/inline-media";
 const ENDPOINT = "read";
 
 /** Persistent user settings namespace for this plugin. */
 export const MEDIA_SETTINGS_NAMESPACE = "inline-media";
-
-/** Schema of the user settings section. */
-export const MEDIA_SETTINGS_SCHEMA = z.object({
-  autoRender: z.boolean().required(),
-  displayCap: z.number().step(1).min(1).max(30).required(),
-  imageMaxPx: z.number().step(1).min(160).max(1200).required(),
-  comfyUrl: z.string().max(512).required(),
-});
 
 /** Composition defaults; the user layer overrides these. */
 export const MEDIA_SETTINGS_DEFAULTS = Object.freeze({
@@ -50,6 +40,14 @@ export const MEDIA_SETTINGS_DEFAULTS = Object.freeze({
   // Empty means "use the built-in default" (`http://127.0.0.1:8188`),
   // so the settings UI only shows addresses the user actually set.
   comfyUrl: "",
+});
+
+/** Live configuration projected into DSH's settings forms. */
+export const Config = z.object({
+  autoRender: z.boolean().default(MEDIA_SETTINGS_DEFAULTS.autoRender).volatile(),
+  displayCap: z.number().step(1).min(1).max(30).default(MEDIA_SETTINGS_DEFAULTS.displayCap).volatile(),
+  imageMaxPx: z.number().step(1).min(160).max(1200).default(MEDIA_SETTINGS_DEFAULTS.imageMaxPx).volatile(),
+  comfyUrl: z.string().max(512).default(MEDIA_SETTINGS_DEFAULTS.comfyUrl).volatile(),
 });
 
 function success(value) {
@@ -136,6 +134,7 @@ async function readLocal(ctx, source, sessionId) {
 }
 
 async function handleRead(ctx, endpoint, payload, signal, resolveSettings) {
+  if (endpoint === "settings") return success(resolveSettings());
   if (endpoint !== ENDPOINT) return failure("unknown inline-media endpoint");
   if (!payload || typeof payload !== "object") return failure("invalid request");
   const { source, sessionId } = payload;
@@ -155,21 +154,30 @@ async function handleRead(ctx, endpoint, payload, signal, resolveSettings) {
   }
 }
 
-export function apply(ctx) {
-  const settings = ctx.settings.register(MEDIA_SETTINGS_NAMESPACE, MEDIA_SETTINGS_SCHEMA, {
-    base: MEDIA_SETTINGS_DEFAULTS,
+export function apply(ctx, config) {
+  ctx.effect(() => ctx.settings.configure({ auto: false }, ctx.fiber), "inline-media: settings page");
+  const resolveSettings = () => ({
+    autoRender: config.autoRender.get(),
+    displayCap: config.displayCap.get(),
+    imageMaxPx: config.imageMaxPx.get(),
+    comfyUrl: config.comfyUrl.get(),
   });
-  const resolveSettings = () => settings.get();
   ctx.inject(["connection"], (connectionCtx) => {
-    connectionCtx.effect(() => {
-      const dispose = connectionCtx.connection.rpc.handle(
-        CHANNEL,
-        (endpoint, payload, signal) => handleRead(ctx, endpoint, payload, signal, resolveSettings),
-      );
-      return () => {
-        void dispose();
-      };
-    }, "inline-media: rpc");
+    for (const endpoint of ["read", "settings"]) {
+      connectionCtx.effect(() => connectionCtx.connection.fetch.register({
+        path: `/api/inline-media.${endpoint}`,
+        methods: ["POST"],
+        requestBody: "buffered",
+        async fetch(request) {
+          let message;
+          try { message = await request.json(); } catch { return new Response("invalid request", { status: 400 }); }
+          if (message?.type !== "client-request" || typeof message.rpcId !== "string" ||
+            message.method !== `inline-media.${endpoint}`) return new Response("invalid request", { status: 400 });
+          const result = await handleRead(ctx, endpoint, message.payload, request.signal, resolveSettings);
+          return Response.json({ type: "server-response", rpcId: message.rpcId, result });
+        },
+      }), `inline-media: ${endpoint} route`);
+    }
   });
 }
 

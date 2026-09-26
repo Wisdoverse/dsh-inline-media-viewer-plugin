@@ -57,7 +57,7 @@ audio/sound.mp3                    →  <audio controls>
 
 ## 安装
 
-适配 DSH **v0.1.3-alpha.1+** API，并已在 **v0.1.5-rc.1** 验证宿主启动和设置入口。尚未在 v0.1.5-rc.1 完成端到端媒体播放验证。
+当前源码适配 DSH **v0.1.7-rc.2**。设置、本地图片读取及内联图片卡片已在真实 Web 页面配合本机模拟模型验证；视频和音频播放尚未验证。已发布的 v1.0.11 仍使用旧设置接口，使用 v0.1.7 时请先按下文从源码安装，等待新版发布。
 
 ### 通过 npm 安装
 
@@ -95,7 +95,7 @@ dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.11
 
 3. 重新构建或重启 Web profile。
 
-插件通过 [`cordis.patch.yml`](cordis.patch.yml) 挂载宿主 RPC 通道、客户端投影和设置区域。
+插件通过 [`cordis.patch.yml`](cordis.patch.yml) 挂载宿主 API 路由、客户端投影和设置区域。
 
 ## 配置
 
@@ -110,7 +110,7 @@ dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.11
 | 媒体最大高度 | `380 px` | `160`–`1200 px` |
 | ComfyUI 源站（可选） | 留空 | `http(s)://host[:port]` |
 
-设置值保存在 DSH 设置文档中。只有回环连接可以写入；远程浏览器可以读取设置，但不能持久化修改。
+设置值保存在当前 DSH profile 配置中。升级时，DSH 会导入旧 `settings.yaml` 中的 `inline-media` 设置。只有回环连接可以写入；远程浏览器可通过插件的认证 RPC 通道读取这四项设置，但不能修改。
 
 ### ComfyUI 源站
 
@@ -144,6 +144,7 @@ ComfyUI 来源。非空的无效地址会明确报错，而不会静默回退到
 | 命令 | 用途 |
 | --- | --- |
 | `node test.mjs` | 直接运行无依赖的单元测试。 |
+| `node test.mjs --host` | 安装 peer 依赖后运行宿主注册检查。 |
 | `npm test` | 通过 npm 运行同一套单元测试。 |
 | `npm run lint` | 对宿主模块和测试文件执行语法检查。 |
 
@@ -151,7 +152,7 @@ ComfyUI 来源。非空的无效地址会明确报错，而不会静默回退到
 
 | 路径 | 职责 |
 | --- | --- |
-| `index.js` | 宿主 RPC 通道、ComfyUI 代理和设置注册。 |
+| `index.js` | 宿主 API 路由、ComfyUI 代理和设置注册。 |
 | `lib.js` | 无依赖的纯辅助函数。 |
 | `client/client.js` | 消息投影、媒体渲染器和设置界面。 |
 | `cordis.patch.yml` | Bundle 挂载和集成点。 |

@@ -7,15 +7,16 @@ window.__ModuleLoader__.load({
 
     const React = require("react");
     const { createElement: h, useEffect, useMemo, useState } = React;
-    const CHANNEL = "/inline-media";
-    const ENDPOINT = "read";
+    const CHANNEL = "/api";
+    const ENDPOINT = "inline-media.read";
     const DISPLAY_CAP = 12;
     const SETTINGS_NAMESPACE = "inline-media";
     // Empty config = the host-side built-in default
     // (http://127.0.0.1:8188, ComfyUI's standard local address).
     const COMFY_DEFAULT_URL = "";
     const DEFAULT_SETTINGS = Object.freeze({ autoRender: true, displayCap: DISPLAY_CAP, imageMaxPx: 380, comfyUrl: COMFY_DEFAULT_URL });
-    let settingsScope = null;
+    let settingsForm = null;
+    let remoteSettingsRequest = null;
 
     function clampInt(raw, min, max, fallback) {
       const n = Number.parseInt(String(raw), 10);
@@ -23,10 +24,8 @@ window.__ModuleLoader__.load({
       return Math.min(max, Math.max(min, n));
     }
 
-    function readSettings() {
-      if (settingsScope === null) return DEFAULT_SETTINGS;
-      const snapshot = settingsScope.getSnapshot();
-      const value = snapshot && snapshot.value;
+    function readSettings(remoteSettings) {
+      const value = settingsForm && settingsForm.getSnapshot().value || remoteSettings;
       if (!value || typeof value !== "object") return DEFAULT_SETTINGS;
       return {
         autoRender: value.autoRender !== false,
@@ -36,6 +35,20 @@ window.__ModuleLoader__.load({
           ? value.comfyUrl.trim().slice(0, 512)
           : DEFAULT_SETTINGS.comfyUrl,
       };
+    }
+
+    function fetchRemoteSettings(connection) {
+      if (remoteSettingsRequest === null) {
+        remoteSettingsRequest = connection.rpc.call(CHANNEL, "inline-media.settings", {}).then((result) => {
+          if (result.ok) return result.value;
+          remoteSettingsRequest = null;
+          return null;
+        }).catch(() => {
+          remoteSettingsRequest = null;
+          return null;
+        });
+      }
+      return remoteSettingsRequest;
     }
     const MEDIA_EXTENSIONS = new Set([
       "png", "jpg", "jpeg", "webp", "gif", "avif", "bmp",
@@ -159,8 +172,6 @@ window.__ModuleLoader__.load({
     };
 
     function selectMedia(owner) {
-      const settings = readSettings();
-      if (!settings.autoRender) return null;
       const text = [];
       const mentions = owner.turn.data && owner.turn.data.get("inline-media-mentions");
       if (mentions) {
@@ -173,7 +184,7 @@ window.__ModuleLoader__.load({
           .filter((block) => block && block.kind === "text" && typeof block.text === "string")
           .map((block) => block.text));
       }
-      const candidates = extractCandidates(text.join("\n")).slice(0, settings.displayCap);
+      const candidates = extractCandidates(text.join("\n"));
       return candidates.length === 0 ? null : candidates;
     }
 
@@ -363,9 +374,22 @@ window.__ModuleLoader__.load({
       })) : null);
     }
 
-    function MediaTail({ matched, connection, sessionId }) {
-      const settings = readSettings();
+    function MediaTailContent({ matched, connection, sessionId }) {
+      const [remoteSettings, setRemoteSettings] = useState(null);
+      const [settings, setSettings] = useState(() => readSettings());
+      useEffect(() => {
+        let active = true;
+        void fetchRemoteSettings(connection).then((value) => {
+          if (active) setRemoteSettings(value);
+        });
+        return () => { active = false; };
+      }, [connection]);
+      useEffect(() => {
+        setSettings(readSettings(remoteSettings));
+        return settingsForm?.subscribe(() => setSettings(readSettings(remoteSettings)));
+      }, [remoteSettings]);
       const candidates = useMemo(() => matched.slice(0, settings.displayCap), [matched, settings.displayCap]);
+      if (!settings.autoRender) return null;
       return h("section", {
         "aria-label": "媒体预览",
         style: { marginTop: 14 },
@@ -393,11 +417,16 @@ window.__ModuleLoader__.load({
       }))));
     }
 
+    function MediaTail(props) {
+      const matched = selectMedia(props);
+      return matched === null ? null : h(MediaTailContent, { ...props, matched });
+    }
+
     const SETTINGS_NS = "inlineMedia";
     const SETTINGS_DICT = {
       zh: {
         nav: "媒体预览",
-        intro: "调整聊天中内联媒体预览的行为。设置会持久保存到本机设置文档。",
+        intro: "调整聊天中内联媒体预览的行为。设置会保存到当前 profile 配置。",
         autoRender: "自动渲染检测到的媒体",
         autoRenderHint: "关闭后仅扫描不展示(仍会扫描消息)。",
         displayCap: "每回合最多显示",
@@ -412,7 +441,7 @@ window.__ModuleLoader__.load({
       },
       en: {
         nav: "Media preview",
-        intro: "Tune how inline media is previewed in conversations. Changes persist to the local settings document.",
+        intro: "Tune how inline media is previewed in conversations. Changes persist to the active profile configuration.",
         autoRender: "Auto-render detected media",
         autoRenderHint: "When off, mentions are still scanned but nothing is shown.",
         displayCap: "Max items per turn",
@@ -427,10 +456,19 @@ window.__ModuleLoader__.load({
       },
     };
 
-    function MediaSettingsSection({ scope, t }) {
-      const [snap, setSnap] = useState(scope ? scope.getSnapshot() : null);
-      useEffect(() => (scope ? scope.subscribe(() => setSnap(scope.getSnapshot())) : undefined), [scope]);
-      const stored = snap && snap.value && typeof snap.value === "object" ? snap.value : DEFAULT_SETTINGS;
+    function MediaSettingsSection({ form, connection, t }) {
+      const [snap, setSnap] = useState(form ? form.getSnapshot() : null);
+      const [remoteSettings, setRemoteSettings] = useState(null);
+      useEffect(() => (form ? form.subscribe(() => setSnap(form.getSnapshot())) : undefined), [form]);
+      useEffect(() => {
+        let active = true;
+        void fetchRemoteSettings(connection).then((value) => {
+          if (active) setRemoteSettings(value);
+        });
+        return () => { active = false; };
+      }, [connection]);
+      const stored = snap && snap.value && typeof snap.value === "object"
+        ? snap.value : remoteSettings || DEFAULT_SETTINGS;
       const writable = snap ? snap.writable === true : false;
       const comfyUrlValue = String(typeof stored.comfyUrl === "string" ? stored.comfyUrl : DEFAULT_SETTINGS.comfyUrl);
       const comfyUrlInvalid = comfyUrlValue.trim() !== "" && !normalizeComfyOrigin(comfyUrlValue);
@@ -438,15 +476,14 @@ window.__ModuleLoader__.load({
         setSnap((prev) => (prev
           ? { ...prev, value: { ...(prev.value || DEFAULT_SETTINGS), [field]: next } }
           : prev));
-        if (scope && writable) scope.set(field, next);
+        if (form && writable) void form.set(field, next).catch(() => setSnap(form.getSnapshot()));
       };
       const reset = () => {
-        if (!scope || !writable) return;
+        if (!form || !writable) return;
         setSnap((prev) => (prev ? { ...prev, value: DEFAULT_SETTINGS } : prev));
-        scope.unset("autoRender");
-        scope.unset("displayCap");
-        scope.unset("imageMaxPx");
-        scope.unset("comfyUrl");
+        void form.mutate(["autoRender", "displayCap", "imageMaxPx", "comfyUrl"]
+          .map((field) => ({ op: "unset", path: [field] })))
+          .catch(() => setSnap(form.getSnapshot()));
       };
       const field = (label, hint, node) => h("label", {
         style: { display: "grid", gap: 4, margin: "14px 0 0" },
@@ -542,18 +579,22 @@ window.__ModuleLoader__.load({
     }
 
     const name = "dsh-inline-media-viewer";
-    const inject = ["slots", "connection", "settingsScope", "locale", "uiConversation"];
+    const inject = ["slots", "connection", "configForms", "locale", "uiConversation"];
 
     function apply(ctx) {
       const connection = ctx.get("connection");
       ctx.uiConversation.events.register(mediaMentionsDefinition);
       ctx.effect(() => ctx.locale.register(SETTINGS_NS, SETTINGS_DICT), "inline-media: dictionaries");
       const t = ctx.locale.bind(SETTINGS_NS);
-      const scope = ctx.settingsScope.bind({ namespace: SETTINGS_NAMESPACE });
-      settingsScope = scope;
+      const form = ctx.configForms.get(SETTINGS_NAMESPACE);
+      settingsForm = form;
+      ctx.effect(() => () => {
+        settingsForm = null;
+        remoteSettingsRequest = null;
+      }, "inline-media: client settings");
       ctx.slots.inject("conversation.chat.turnTail", () => ctx.slots.register({
         name: "conversation.chat.turnTail",
-        select: selectMedia,
+        id: "inline-media",
         inject: () => ({ connection }),
       }, MediaTail));
       ctx.slots.inject("settings.section", () => ctx.slots.register({
@@ -562,14 +603,14 @@ window.__ModuleLoader__.load({
         order: 25,
         label: () => t("nav"),
         locale: SETTINGS_NS,
-        inject: () => ({ scope }),
+        inject: () => ({ form, connection }),
       }, MediaSettingsSection));
     }
 
     exports.apply = apply;
     exports.inject = inject;
     exports.name = name;
-    exports.testing = Object.freeze({ extractCandidates, mediaMentionsDefinition, mediaTransport, selectMedia, toolArgumentText });
+    exports.testing = Object.freeze({ extractCandidates, fetchRemoteSettings, mediaMentionsDefinition, mediaTransport, readSettings, selectMedia, toolArgumentText });
     return module.exports;
   },
 });

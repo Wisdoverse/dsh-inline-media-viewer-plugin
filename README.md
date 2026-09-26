@@ -59,7 +59,7 @@ audio/sound.mp3                    →  <audio controls>
 
 ## Installation
 
-Targets DSH **v0.1.3-alpha.1+** APIs. Host startup and the settings section were verified on **v0.1.5-rc.1**. End-to-end media playback on v0.1.5-rc.1 has not been verified.
+The current source targets DSH **v0.1.7-rc.2**. Its settings, local image read, and inline image card have been verified in the real Web UI with a local mock model; video and audio playback have not been verified. The published v1.0.11 package still targets the older settings API, so use the source installation below for v0.1.7 until a new release is published.
 
 ### From npm
 
@@ -97,7 +97,7 @@ Restart the Web profile after installation.
 
 3. Rebuild or restart the Web profile.
 
-The plugin mounts its host RPC channel, client projection, and settings section
+The plugin mounts its host API routes, client projection, and settings section
 through [`cordis.patch.yml`](cordis.patch.yml).
 
 ## Configuration
@@ -114,9 +114,10 @@ switch live between English and Chinese.
 | Maximum media height | `380 px` | `160`–`1200 px` |
 | ComfyUI origin (optional) | Empty | `http(s)://host[:port]` |
 
-Settings are stored in the DSH settings document. Writes are available only on
-loopback connections; remote browsers can read settings but cannot persist
-changes.
+Settings are stored in the active DSH profile configuration. DSH imports the
+previous `inline-media` section from `settings.yaml` when upgrading. Writes are
+available only on loopback connections; remote browsers can read these four
+settings through the plugin's authenticated RPC channel but cannot change them.
 
 ### ComfyUI origin
 
@@ -156,6 +157,7 @@ limitations.
 | Command | Purpose |
 | --- | --- |
 | `node test.mjs` | Run the dependency-free unit tests directly. |
+| `node test.mjs --host` | Run the host registration check after installing peer dependencies. |
 | `npm test` | Run the same unit test suite through npm. |
 | `npm run lint` | Syntax-check the host modules and test file. |
 
@@ -163,7 +165,7 @@ limitations.
 
 | Path | Responsibility |
 | --- | --- |
-| `index.js` | Host RPC channel, ComfyUI proxy, and settings registration. |
+| `index.js` | Host API routes, ComfyUI proxy, and settings registration. |
 | `lib.js` | Pure, dependency-free helpers. |
 | `client/client.js` | Turn projection, media renderer, and settings UI. |
 | `cordis.patch.yml` | Bundle mounting and integration points. |
