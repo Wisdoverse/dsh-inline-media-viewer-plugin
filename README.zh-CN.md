@@ -57,14 +57,14 @@ audio/sound.mp3                    →  <audio controls>
 
 ## 安装
 
-当前源码兼容 DSH **v0.1.7-rc.2** 和 **v0.2.0-rc.2**。在 v0.2.0-rc.2 的真实 Web 页面中，插件正常加载，设置刷新后仍能读回，带认证的 ComfyUI 图片接口返回可解码图片，未认证访问返回 HTTP 401。本地图片读取和内联图片卡片已在 v0.1.7-rc.2 验证，尚未在 v0.2.0-rc.2 重新测试；视频和音频播放也尚未验证。已发布的 v1.0.11 仍使用旧设置接口，使用上述版本时请按下文从源码安装，等待新版发布。
+**1.0.12** 兼容 DSH **v0.1.7-rc.2** 和 **v0.2.0-rc.2**。在 v0.2.0-rc.2 的真实 Web 页面中，插件正常加载，设置刷新后仍能读回，带认证的 ComfyUI 图片接口返回可解码图片，未认证访问返回 HTTP 401。本地图片读取和内联图片卡片已在 v0.1.7-rc.2 验证，尚未在 v0.2.0-rc.2 重新测试；视频和音频播放也尚未验证。请从 v1.0.11 升级，以移除已废弃的 `settingsScope` 依赖。
 
 ### 通过 npm 安装
 
 在 Web profile 中安装并启用 Bundle：
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.11
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.12
 ```
 
 安装后重启 Web profile。

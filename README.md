@@ -59,14 +59,14 @@ audio/sound.mp3                    →  <audio controls>
 
 ## Installation
 
-The current source supports DSH **v0.1.7-rc.2** and **v0.2.0-rc.2**. On v0.2.0-rc.2, the plugin loaded in the real Web UI, settings remained saved after a refresh, and the authenticated ComfyUI image route returned a decodable image; unauthenticated access returned HTTP 401. Local image reads and the inline image card were verified on v0.1.7-rc.2, but have not been retested on v0.2.0-rc.2. Video and audio playback remain unverified. The published v1.0.11 package still uses the older settings API, so install from source for either version until a new package is published.
+Version **1.0.12** supports DSH **v0.1.7-rc.2** and **v0.2.0-rc.2**. On v0.2.0-rc.2, the plugin loaded in the real Web UI, settings remained saved after a refresh, and the authenticated ComfyUI image route returned a decodable image; unauthenticated access returned HTTP 401. Local image reads and the inline image card were verified on v0.1.7-rc.2, but have not been retested on v0.2.0-rc.2. Video and audio playback remain unverified. Upgrade from v1.0.11 to remove its obsolete `settingsScope` dependency.
 
 ### From npm
 
 Install and activate the bundle in your Web profile:
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.11
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.12
 ```
 
 Restart the Web profile after installation.
