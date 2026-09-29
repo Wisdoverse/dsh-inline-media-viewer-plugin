@@ -59,7 +59,7 @@ audio/sound.mp3                    →  <audio controls>
 
 ## Installation
 
-The current source targets DSH **v0.1.7-rc.2**. Its settings, local image read, and inline image card have been verified in the real Web UI with a local mock model; video and audio playback have not been verified. The published v1.0.11 package still targets the older settings API, so use the source installation below for v0.1.7 until a new release is published.
+The current source supports DSH **v0.1.7-rc.2** and **v0.2.0-rc.2**. On v0.2.0-rc.2, the plugin loaded in the real Web UI, settings remained saved after a refresh, and the authenticated ComfyUI image route returned a decodable image; unauthenticated access returned HTTP 401. Local image reads and the inline image card were verified on v0.1.7-rc.2, but have not been retested on v0.2.0-rc.2. Video and audio playback remain unverified. The published v1.0.11 package still uses the older settings API, so install from source for either version until a new package is published.
 
 ### From npm
 
