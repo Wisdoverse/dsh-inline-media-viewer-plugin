@@ -1,9 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.0.12
 
 - Verify the current source on DSH v0.2.0-rc.2: Web settings load and persist, authenticated ComfyUI image reads succeed, and unauthenticated reads are rejected; the plugin-facing APIs used here are unchanged from v0.1.7-rc.2.
-- Adapt DSH v0.1.7 configuration to live `Config` fields and client `configForms`.
+- Replace the removed `settingsScope` client service with live `Config` fields and `configForms`, fixing plugins stuck pending on DSH v0.1.7 and v0.2.0.
 - Preserve remote read-only media preferences through the authenticated RPC channel.
 - Register media endpoints on DSH's authenticated `/api` bridge; real v0.1.7 testing caught the old custom channel returning HTTP 405.
 - Render the turn-tail media card from the slot's actual turn props; verified image display and enlargement in the v0.1.7-rc.2 Web UI.
