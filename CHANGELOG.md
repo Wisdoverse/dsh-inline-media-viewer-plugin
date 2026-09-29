@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Verify the current source on DSH v0.2.0-rc.2: Web settings load and persist, authenticated ComfyUI image reads succeed, and unauthenticated reads are rejected; the plugin-facing APIs used here are unchanged from v0.1.7-rc.2.
 - Adapt DSH v0.1.7 configuration to live `Config` fields and client `configForms`.
 - Preserve remote read-only media preferences through the authenticated RPC channel.
 - Register media endpoints on DSH's authenticated `/api` bridge; real v0.1.7 testing caught the old custom channel returning HTTP 405.
