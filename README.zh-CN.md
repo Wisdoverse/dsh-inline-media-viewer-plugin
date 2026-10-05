@@ -1,27 +1,29 @@
-<h1 align="center">dsh-inline-media-viewer</h1>
+<div align="center">
 
-<p align="center">
-  <strong>为 DeepSeek Harness Web 提供内联图像、视频和音频预览</strong>
-</p>
+<a id="dsh-inline-media-viewer"></a>
 
-<p align="center">
-  <a href="CHANGELOG.md"><img alt="最新标签" src="https://img.shields.io/github/v/tag/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square&amp;label=version"></a>
-  <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square"></a>
-  <a href="package.json"><img alt="主要语言" src="https://img.shields.io/github/languages/top/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square"></a>
-  <a href="#配置"><img alt="可选 ComfyUI" src="https://img.shields.io/badge/ComfyUI-optional-ff6f00?style=flat-square"></a>
-</p>
+# 🖼️ dsh-inline-media-viewer
 
-<p align="center">
-  <a href="README.md">English</a> · <strong>简体中文</strong>
-</p>
+**为 DeepSeek Harness Web 提供内联图像、视频和音频预览。**
 
-将 DSH 对话中出现的媒体路径和 URL 安全地转换为内联预览，无需再从聊天日志中复制路径。
+<a href="README.md">English</a> · <strong>简体中文</strong>
 
-```text
-https://…/view?filename=frame.png  →  <img>
-exports/demo.mp4                   →  <video controls>
-audio/sound.mp3                    →  <audio controls>
+[![版本](https://img.shields.io/github/v/tag/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square&amp;label=version)](CHANGELOG.md)
+[![许可证](https://img.shields.io/badge/license-MIT-16a34a.svg?style=flat-square)](LICENSE)
+[![主要语言](https://img.shields.io/github/languages/top/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square)](package.json)
+[![可选 ComfyUI](https://img.shields.io/badge/ComfyUI-optional-ff6f00?style=flat-square)](#配置)
+
+</div>
+
+**🚀 快速安装**
+
+```sh
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.12
 ```
+
+安装后请重启 Web profile。请查看[兼容性和安装详情](#安装)。
+
+[🚀 安装](#安装) · [✨ 功能](#功能特性) · [⚙️ 配置](#配置) · [🐛 反馈](https://github.com/Wisdoverse/dsh-inline-media-viewer-plugin/issues)
 
 ## 目录
 
@@ -33,15 +35,21 @@ audio/sound.mp3                    →  <audio controls>
 - [开发](#开发)
 - [许可证](#许可证)
 
+```text
+https://…/view?filename=frame.png  →  <img>
+exports/demo.mp4                   →  <video controls>
+audio/sound.mp3                    →  <audio controls>
+```
+
 ## 功能特性
 
-| 特性 | 说明 |
-| --- | --- |
-| 内联渲染 | 在提及媒体的聊天消息下方直接显示图像、视频和音频。 |
-| 工作区安全读取 | 使用 `realpath` 解析本地路径，并拒绝目录穿越、工作区外路径和符号链接逃逸。 |
-| 可选 ComfyUI 代理 | 由服务端从配置的源站获取识别到的 ComfyUI 媒体 URL，使远程用户和 HTTPS 页面也能正常查看。 |
-| 资源限制 | 每个文件或响应最大 48 MiB，远程请求最长 20 秒。 |
-| 用户控制 | 提供自动渲染、每条消息的媒体数量、媒体高度和可选的 ComfyUI 源站设置。 |
+| 图标 | 功能 | 说明 |
+| --- | --- | --- |
+| 🖼️ | 内联渲染 | 在提及媒体的聊天消息下方直接显示图像、视频和音频。 |
+| 📁 | 工作区安全读取 | 使用 `realpath` 解析本地路径，并拒绝目录穿越、工作区外路径和符号链接逃逸。 |
+| 🔌 | 可选 ComfyUI 代理 | 由服务端从配置的源站获取识别到的 ComfyUI 媒体 URL，使远程用户和 HTTPS 页面也能正常查看。 |
+| 📏 | 资源限制 | 每个文件或响应最大 48 MiB，远程请求最长 20 秒。 |
+| ⚙️ | 用户控制 | 提供自动渲染、每条消息的媒体数量、媒体高度和可选的 ComfyUI 源站设置。 |
 
 > [!NOTE]
 > ComfyUI 不是必需依赖。即使没有安装或运行 ComfyUI，工作区文件和普通 HTTP(S)

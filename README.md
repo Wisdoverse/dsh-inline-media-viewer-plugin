@@ -1,28 +1,29 @@
-<h1 align="center">dsh-inline-media-viewer</h1>
+<div align="center">
 
-<p align="center">
-  <strong>Inline image, video, and audio previews for DeepSeek Harness Web</strong>
-</p>
+<a id="dsh-inline-media-viewer"></a>
 
-<p align="center">
-  <a href="CHANGELOG.md"><img alt="Latest tag" src="https://img.shields.io/github/v/tag/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square&amp;label=version"></a>
-  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square"></a>
-  <a href="package.json"><img alt="Top language" src="https://img.shields.io/github/languages/top/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square"></a>
-  <a href="#configuration"><img alt="Optional ComfyUI" src="https://img.shields.io/badge/ComfyUI-optional-ff6f00?style=flat-square"></a>
-</p>
+# 🖼️ dsh-inline-media-viewer
 
-<p align="center">
-  <strong>English</strong> · <a href="README.zh-CN.md">简体中文</a>
-</p>
+**Inline image, video, and audio previews for DeepSeek Harness Web.**
 
-Turn media paths and URLs mentioned in a DSH conversation into secure inline
-previews—without copying them out of the chat log.
+<strong>English</strong> · <a href="README.zh-CN.md">简体中文</a>
 
-```text
-https://…/view?filename=frame.png  →  <img>
-exports/demo.mp4                   →  <video controls>
-audio/sound.mp3                    →  <audio controls>
+[![Version](https://img.shields.io/github/v/tag/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square&amp;label=version)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-16a34a.svg?style=flat-square)](LICENSE)
+[![Top language](https://img.shields.io/github/languages/top/Wisdoverse/dsh-inline-media-viewer-plugin?style=flat-square)](package.json)
+[![ComfyUI optional](https://img.shields.io/badge/ComfyUI-optional-ff6f00?style=flat-square)](#configuration)
+
+</div>
+
+**🚀 Quick install**
+
+```sh
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.12
 ```
+
+Restart the Web profile after installation. See [compatibility and installation details](#installation).
+
+[🚀 Installation](#installation) · [✨ Features](#features) · [⚙️ Configuration](#configuration) · [🐛 Feedback](https://github.com/Wisdoverse/dsh-inline-media-viewer-plugin/issues)
 
 ## Contents
 
@@ -34,15 +35,21 @@ audio/sound.mp3                    →  <audio controls>
 - [Development](#development)
 - [License](#license)
 
+```text
+https://…/view?filename=frame.png  →  <img>
+exports/demo.mp4                   →  <video controls>
+audio/sound.mp3                    →  <audio controls>
+```
+
 ## Features
 
-| Feature | Description |
-| --- | --- |
-| Inline rendering | Displays images, videos, and audio directly below the chat turn that mentions them. |
-| Workspace-safe reads | Resolves local paths with `realpath` and rejects traversal, out-of-workspace paths, and symlink escapes. |
-| Optional ComfyUI proxy | Fetches recognized ComfyUI media URLs server-side from the configured origin, including for remote users and HTTPS pages. |
-| Bounded transfers | Limits each file or response to 48 MiB and remote requests to 20 seconds. |
-| User controls | Provides auto-render, per-turn item limit, media height, and optional ComfyUI origin settings. |
+| Icon | Feature | Description |
+| --- | --- | --- |
+| 🖼️ | Inline rendering | Displays images, videos, and audio directly below the chat turn that mentions them. |
+| 📁 | Workspace-safe reads | Resolves local paths with `realpath` and rejects traversal, out-of-workspace paths, and symlink escapes. |
+| 🔌 | Optional ComfyUI proxy | Fetches recognized ComfyUI media URLs server-side from the configured origin, including for remote users and HTTPS pages. |
+| 📏 | Bounded transfers | Limits each file or response to 48 MiB and remote requests to 20 seconds. |
+| ⚙️ | User controls | Provides auto-render, per-turn item limit, media height, and optional ComfyUI origin settings. |
 
 > [!NOTE]
 > ComfyUI is not required. Workspace files and regular HTTP(S) media URLs work
