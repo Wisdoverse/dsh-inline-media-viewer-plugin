@@ -116,7 +116,7 @@ async function readRemote(source, signal, settingsValue) {
 }
 
 async function readLocal(ctx, source, sessionId) {
-  const cwd = await resolveSessionCwd(ctx.sessions, ctx.sessionQuery, sessionId);
+  const cwd = await resolveSessionCwd(ctx.sessions, ctx.sessionQuery, sessionId, ctx.get("workingDirectory"));
   if (!cwd) throw new Error("session working directory is unavailable");
   const mime = mimeOf(source);
   if (!mime) throw new Error("unsupported media extension");
