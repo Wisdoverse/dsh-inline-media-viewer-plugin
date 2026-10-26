@@ -6,7 +6,9 @@
  */
 
 import assert from "node:assert/strict";
-import { resolve } from "node:path";
+import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { testing } from "./lib.js";
 
 assert.equal(testing.extensionOf("movie.mp4"), "mp4");
@@ -34,6 +36,24 @@ assert.equal(
 assert.equal(historyReads, 0);
 assert.equal(await testing.resolveSessionCwd(new Map(), sessionQuery, "persisted"), "/persisted/workspace");
 assert.equal(historyReads, 1);
+const liveSession = { header: { cwd: "/original/workspace" } };
+assert.equal(await testing.resolveSessionCwd(new Map([["live", liveSession]]), sessionQuery, "live", {
+  get: (session) => {
+    assert.equal(session, liveSession);
+    return "/current/workspace";
+  },
+}), "/current/workspace");
+assert.equal(historyReads, 1);
+assert.equal(await testing.resolveSessionCwd(new Map(), {
+  readSession: async () => ({
+    session: { cwd: "/original/workspace" },
+    events: [
+      { type: "working-directory/change", data: { cwd: "/first/workspace" } },
+      { type: "working-directory/change", data: { cwd: "/current/workspace" } },
+      { type: "tool/call", data: { cwd: "/untrusted/workspace" } },
+    ],
+  }),
+}, "persisted"), "/current/workspace");
 // Default origin: ComfyUI's standard local address; loopback aliases are
 // accepted and rewritten onto it.
 assert.equal(
@@ -275,7 +295,7 @@ try {
   else globalThis.window = previousWindow;
 }
 
-// Optional real-dependency smoke check for the v0.1.7 host contract.
+// Check host registration and workspace containment with the installed peer dependencies.
 if (process.argv.includes("--host")) {
   const { apply, Config, MEDIA_SETTINGS_DEFAULTS } = await import("./index.js");
   assert.deepEqual(Object.fromEntries(Object.entries(Config({})).map(([field, value]) =>
@@ -287,6 +307,10 @@ if (process.argv.includes("--host")) {
   const settings = { ...MEDIA_SETTINGS_DEFAULTS, comfyUrl: "invalid/path" };
   const hostCtx = {
     fiber: {},
+    get: (name) => {
+      assert.equal(name, "workingDirectory");
+      return hostCtx.workingDirectory;
+    },
     settings: {
       configure(options, owner) {
         assert.deepEqual(options, { auto: false });
@@ -323,6 +347,30 @@ if (process.argv.includes("--host")) {
   assert.match((await call("read", request)).error.message, /configured ComfyUI address is invalid/);
   settings.comfyUrl = "";
   assert.match((await call("read", { ...request, source: "https://example.com/a.png" })).error.message, /not an allowed ComfyUI/);
+  const workspace = await mkdtemp(join(tmpdir(), "inline-media-"));
+  try {
+    const original = join(workspace, "original");
+    const current = join(workspace, "current");
+    await mkdir(original);
+    await mkdir(current);
+    await writeFile(join(original, "frame.png"), "original");
+    await writeFile(join(current, "frame.png"), "current");
+    hostCtx.sessions.set("live", { header: { cwd: original } });
+    hostCtx.workingDirectory = { get: () => current };
+    hostCtx.sessionQuery = { readSession: async () => ({
+      session: { cwd: original },
+      events: [{ type: "working-directory/change", data: { cwd: current } }],
+    }) };
+    for (const sessionId of ["live", "persisted"]) {
+      assert.equal((await call("read", { source: "frame.png", sessionId })).value.dataUrl,
+        `data:image/png;base64,${Buffer.from("current").toString("base64")}`);
+      for (const source of ["../original/frame.png", join(original, "frame.png")]) {
+        assert.match((await call("read", { source, sessionId })).error.message, /outside the session workspace/);
+      }
+    }
+  } finally {
+    await rm(workspace, { recursive: true, force: true });
+  }
   for (const dispose of effects) dispose();
   assert.equal(routes.size, 0);
   assert.equal(settingsDisposed, true);

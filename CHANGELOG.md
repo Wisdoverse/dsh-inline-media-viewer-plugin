@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Support DSH v0.2.1-rc.2 and v0.2.1-rc.3. Declare the supported range through `engines.dsh`.
+- Read local media from the current session directory. Restore the last directory change for stored sessions.
+- Keep the session header fallback for earlier DSH versions without the working-directory service.
+- Add regression checks for directory changes and workspace containment in live and stored sessions.
+- Check the v0.2.1-rc.3 Web UI: settings persist and reset, and local images display and enlarge. Escape closes the enlarged image.
+- Check authenticated image reads, HTTP 401 without authentication, and rejection of paths outside the current session workspace.
+- Video playback, audio playback, and ComfyUI transfers remain unchecked on v0.2.1-rc.3.
+
 ## 1.0.12
 
 - Verify the current source on DSH v0.2.0-rc.2: Web settings load and persist, authenticated ComfyUI image reads succeed, and unauthenticated reads are rejected; the plugin-facing APIs used here are unchanged from v0.1.7-rc.2.

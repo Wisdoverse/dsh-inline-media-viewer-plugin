@@ -22,6 +22,7 @@ dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.12
 ```
 
 Restart the Web profile after installation. See [compatibility and installation details](#installation).
+For DSH v0.2.1 working-directory support, [install the current source](#from-source).
 
 [🚀 Installation](#installation) · [✨ Features](#features) · [⚙️ Configuration](#configuration) · [🐛 Feedback](https://github.com/Wisdoverse/dsh-inline-media-viewer-plugin/issues)
 
@@ -66,7 +67,19 @@ audio/sound.mp3                    →  <audio controls>
 
 ## Installation
 
-Version **1.0.12** supports DSH **v0.1.7-rc.2** and **v0.2.0-rc.2**. On v0.2.0-rc.2, the plugin loaded in the real Web UI, settings remained saved after a refresh, and the authenticated ComfyUI image route returned a decodable image; unauthenticated access returned HTTP 401. Local image reads and the inline image card were verified on v0.1.7-rc.2, but have not been retested on v0.2.0-rc.2. Video and audio playback remain unverified. Upgrade from v1.0.11 to remove its obsolete `settingsScope` dependency.
+The current source supports DSH **v0.2.1-rc.2** (`latest`) and **v0.2.1-rc.3** (`next`).
+We checked these npm tags on **2026-10-26**.
+See the [DSH v0.2.1-rc.3 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3).
+Install from source for these unreleased changes.
+
+On **v0.2.1-rc.3**, the Web checks passed for settings persistence, reset, local image display, enlargement, and Escape dismissal.
+Local reads follow the session's current working directory, including stored directory changes.
+The host returned HTTP 401 for unauthenticated reads and rejected paths outside the current session workspace.
+Unit checks also cover stored sessions and the header fallback for earlier DSH versions.
+We did not check video playback, audio playback, or ComfyUI transfers on this version.
+
+The npm commands below install published version **1.0.12**, which supports DSH **v0.1.7-rc.2** and **v0.2.0-rc.2**.
+Upgrade from v1.0.11 to remove its obsolete `settingsScope` dependency.
 
 ### From npm
 
@@ -173,10 +186,10 @@ limitations.
 | Path | Responsibility |
 | --- | --- |
 | `index.js` | Host API routes, ComfyUI proxy, and settings registration. |
-| `lib.js` | Pure, dependency-free helpers. |
+| `lib.js` | Dependency-free helpers, including session directory resolution. |
 | `client/client.js` | Turn projection, media renderer, and settings UI. |
 | `cordis.patch.yml` | Bundle mounting and integration points. |
-| `test.mjs` | Unit tests for the pure helpers. |
+| `test.mjs` | Helper and client checks, plus optional host checks. |
 
 The running Web profile serves a bundled copy. Rebuild or restart it after
 changing the source files.

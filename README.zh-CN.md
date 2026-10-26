@@ -22,6 +22,7 @@ dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.12
 ```
 
 安装后请重启 Web profile。请查看[兼容性和安装详情](#安装)。
+如需支持 DSH v0.2.1 的工作目录切换，请[从当前源码安装](#从源码安装)。
 
 [🚀 安装](#安装) · [✨ 功能](#功能特性) · [⚙️ 配置](#配置) · [🐛 反馈](https://github.com/Wisdoverse/dsh-inline-media-viewer-plugin/issues)
 
@@ -65,7 +66,19 @@ audio/sound.mp3                    →  <audio controls>
 
 ## 安装
 
-**1.0.12** 兼容 DSH **v0.1.7-rc.2** 和 **v0.2.0-rc.2**。在 v0.2.0-rc.2 的真实 Web 页面中，插件正常加载，设置刷新后仍能读回，带认证的 ComfyUI 图片接口返回可解码图片，未认证访问返回 HTTP 401。本地图片读取和内联图片卡片已在 v0.1.7-rc.2 验证，尚未在 v0.2.0-rc.2 重新测试；视频和音频播放也尚未验证。请从 v1.0.11 升级，以移除已废弃的 `settingsScope` 依赖。
+当前源码支持 DSH **v0.2.1-rc.2**（`latest`）和 **v0.2.1-rc.3**（`next`）。
+npm 标签核对日期为 **2026-10-26**。
+参见 [DSH v0.2.1-rc.3 发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3)。
+这些改动尚未发布到 npm，请从源码安装。
+
+在 **v0.2.1-rc.3** 的真实 Web 页面中，设置持久化、恢复默认、本地图片显示、放大和 Escape 关闭均通过检查。
+本地读取使用会话当前工作目录，并恢复已保存的目录切换记录。
+检查确认未认证读取返回 HTTP 401，当前会话工作区之外的路径被拒绝。
+单元检查还覆盖历史会话读取，以及旧版 DSH 使用会话初始目录的行为。
+本轮未检查该版本的视频和音频播放，也未检查 ComfyUI 传输。
+
+下方 npm 命令安装已发布的 **1.0.12**，该版本兼容 DSH **v0.1.7-rc.2** 和 **v0.2.0-rc.2**。
+请从 v1.0.11 升级，以移除已废弃的 `settingsScope` 依赖。
 
 ### 通过 npm 安装
 
@@ -161,10 +174,10 @@ ComfyUI 来源。非空的无效地址会明确报错，而不会静默回退到
 | 路径 | 职责 |
 | --- | --- |
 | `index.js` | 宿主 API 路由、ComfyUI 代理和设置注册。 |
-| `lib.js` | 无依赖的纯辅助函数。 |
+| `lib.js` | 无依赖的辅助函数，包括会话目录解析。 |
 | `client/client.js` | 消息投影、媒体渲染器和设置界面。 |
 | `cordis.patch.yml` | Bundle 挂载和集成点。 |
-| `test.mjs` | 纯辅助函数的单元测试。 |
+| `test.mjs` | 辅助函数和客户端检查，以及可选的宿主检查。 |
 
 运行中的 Web profile 使用构建后的副本。修改源文件后，请重新构建或重启 Web profile。
 

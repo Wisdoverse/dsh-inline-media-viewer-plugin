@@ -13,8 +13,11 @@ exfiltration, no arbitrary SSRF, no unbounded memory use.
   traversal, and out-of-workspace paths are rejected.
 - Only known media extensions are accepted (MIME map in `lib.js`).
 - Size cap: 48 MiB per file.
-- The client must supply a valid session id; the workspace root is taken from
-  that session's header, never from client input.
+- The client must supply a valid session id.
+- On DSH v0.2.1, the host uses the session's current working directory.
+  For stored sessions, the host reads the last `working-directory/change` event.
+  Earlier DSH versions use the session header.
+  The client cannot select the workspace root.
 
 ## Remote (ComfyUI) proxy
 

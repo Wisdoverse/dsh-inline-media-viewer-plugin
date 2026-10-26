@@ -79,9 +79,12 @@ export function isInside(root, target) {
   return rel === "" || (!isAbsolute(rel) && rel !== ".." && !rel.startsWith(`..${sep}`));
 }
 
-export async function resolveSessionCwd(sessions, sessionQuery, sessionId) {
+export async function resolveSessionCwd(sessions, sessionQuery, sessionId, workingDirectory) {
   const live = sessions.get(sessionId);
-  return live ? live.header.cwd : (await sessionQuery.readSession(sessionId)).session.cwd;
+  if (live) return workingDirectory ? workingDirectory.get(live) : live.header.cwd;
+  const snapshot = await sessionQuery.readSession(sessionId);
+  return snapshot.events?.findLast((event) => event.type === "working-directory/change")?.data.cwd
+    ?? snapshot.session.cwd;
 }
 
 /**
