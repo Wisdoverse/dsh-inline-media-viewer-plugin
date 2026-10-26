@@ -65,6 +65,8 @@ audio/sound.mp3                    →  <audio controls>
 | Video | `mp4`, `webm`, `mov`, `m4v`, `mkv`, `avi`, `ogv` |
 | Audio | `mp3`, `wav`, `m4a`, `aac`, `ogg`, `oga`, `flac`, `opus` |
 
+The browser must support the media codec to play its file.
+
 ## Installation
 
 The current source supports DSH **v0.2.1-rc.2** (`latest`) and **v0.2.1-rc.3** (`next`).
@@ -72,11 +74,16 @@ We checked these npm tags on **2026-10-26**.
 See the [DSH v0.2.1-rc.3 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3).
 Install from source for these unreleased changes.
 
-On **v0.2.1-rc.3**, the Web checks passed for settings persistence, reset, local image display, enlargement, and Escape dismissal.
+On **v0.2.1-rc.2** and **v0.2.1-rc.3**, all 28 Web and API checks passed in Microsoft Edge for each version.
+PNG and SVG images displayed. MP4 and WebM videos played, and WAV audio played.
+These checks covered workspace files, direct HTTP URLs, and the ComfyUI proxy.
+A local HTTP fixture supplied ComfyUI responses. We did not run ComfyUI generation workflows.
+
+Settings persistence, reset, display limits, auto-render, image enlargement, and Escape dismissal passed.
+Previews refresh when the ComfyUI origin changes, including transitions between proxy reads and direct URLs.
 Local reads follow the session's current working directory, including stored directory changes.
-The host returned HTTP 401 for unauthenticated reads and rejected paths outside the current session workspace.
-Unit checks also cover stored sessions and the header fallback for earlier DSH versions.
-We did not check video playback, audio playback, or ComfyUI transfers on this version.
+The host rejected unauthenticated reads, paths outside the workspace, redirects, oversized responses, and non-media responses.
+Host checks also cover stored sessions, symlink escapes, directories, oversized files, and the header fallback for earlier DSH versions.
 
 The npm commands below install published version **1.0.12**, which supports DSH **v0.1.7-rc.2** and **v0.2.0-rc.2**.
 Upgrade from v1.0.11 to remove its obsolete `settingsScope` dependency.

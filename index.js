@@ -107,11 +107,11 @@ async function readRemote(source, signal, settingsValue) {
     signal: combined,
   });
   if (!response.ok) throw new Error(`ComfyUI returned HTTP ${response.status}`);
-  const bytes = await responseBytes(response, combined);
-  const mime = mimeOf(source) || response.headers.get("content-type")?.split(";", 1)[0];
+  const mime = response.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
   if (!mime || !/^(?:image|video|audio)\//.test(mime)) {
     throw new Error("unsupported media type");
   }
+  const bytes = await responseBytes(response, combined);
   return { dataUrl: `data:${mime};base64,${bytes.toString("base64")}`, mime };
 }
 
