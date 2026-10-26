@@ -18,11 +18,10 @@
 **🚀 Quick install**
 
 ```sh
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.12
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.13
 ```
 
 Restart the Web profile after installation. See [compatibility and installation details](#installation).
-For DSH v0.2.1 working-directory support, [install the current source](#from-source).
 
 [🚀 Installation](#installation) · [✨ Features](#features) · [⚙️ Configuration](#configuration) · [🐛 Feedback](https://github.com/Wisdoverse/dsh-inline-media-viewer-plugin/issues)
 
@@ -69,10 +68,9 @@ The browser must support the media codec to play its file.
 
 ## Installation
 
-The current source supports DSH **v0.2.1-rc.2** (`latest`) and **v0.2.1-rc.3** (`next`).
+Version **1.0.13** supports DSH **v0.2.1-rc.2** (`latest`) and **v0.2.1-rc.3** (`next`).
 We checked these npm tags on **2026-10-26**.
 See the [DSH v0.2.1-rc.3 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3).
-Install from source for these unreleased changes.
 
 On **v0.2.1-rc.2** and **v0.2.1-rc.3**, all 28 Web and API checks passed in Microsoft Edge for each version.
 PNG and SVG images displayed. MP4 and WebM videos played, and WAV audio played.
@@ -85,15 +83,15 @@ Local reads follow the session's current working directory, including stored dir
 The host rejected unauthenticated reads, paths outside the workspace, redirects, oversized responses, and non-media responses.
 Host checks also cover stored sessions, symlink escapes, directories, oversized files, and the header fallback for earlier DSH versions.
 
-The npm commands below install published version **1.0.12**, which supports DSH **v0.1.7-rc.2** and **v0.2.0-rc.2**.
-Upgrade from v1.0.11 to remove its obsolete `settingsScope` dependency.
+Version **1.0.13** includes the v0.2.1 compatibility changes and media fixes.
+It also keeps the v1.0.12 fix for the obsolete `settingsScope` dependency.
 
 ### From npm
 
 Install and activate the bundle in your Web profile:
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.12
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.13
 ```
 
 Restart the Web profile after installation.
