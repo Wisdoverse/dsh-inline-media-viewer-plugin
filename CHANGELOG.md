@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.13 (2026-10-26)
 
 - Support DSH v0.2.1-rc.2 and v0.2.1-rc.3. Declare the supported range through `engines.dsh`.
 - Read local media from the current session directory. Restore the last directory change for stored sessions.

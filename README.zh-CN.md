@@ -18,11 +18,10 @@
 **🚀 快速安装**
 
 ```sh
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.12
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.13
 ```
 
 安装后请重启 Web profile。请查看[兼容性和安装详情](#安装)。
-如需支持 DSH v0.2.1 的工作目录切换，请[从当前源码安装](#从源码安装)。
 
 [🚀 安装](#安装) · [✨ 功能](#功能特性) · [⚙️ 配置](#配置) · [🐛 反馈](https://github.com/Wisdoverse/dsh-inline-media-viewer-plugin/issues)
 
@@ -68,10 +67,9 @@ audio/sound.mp3                    →  <audio controls>
 
 ## 安装
 
-当前源码支持 DSH **v0.2.1-rc.2**（`latest`）和 **v0.2.1-rc.3**（`next`）。
+版本 **1.0.13** 支持 DSH **v0.2.1-rc.2**（`latest`）和 **v0.2.1-rc.3**（`next`）。
 npm 标签核对日期为 **2026-10-26**。
 参见 [DSH v0.2.1-rc.3 发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3)。
-这些改动尚未发布到 npm，请从源码安装。
 
 在 **v0.2.1-rc.2** 和 **v0.2.1-rc.3** 的真实 Web 页面中，Microsoft Edge 上的 28 项页面和接口检查分别全部通过。
 PNG、SVG 图片显示正常，MP4、WebM 视频和 WAV 音频实际播放成功。
@@ -84,15 +82,15 @@ ComfyUI 响应来自本地 HTTP 测试服务，本轮未运行 ComfyUI 生成工
 宿主拒绝未认证读取、工作区外路径、重定向、超大响应和非媒体响应。
 宿主检查还覆盖历史会话、符号链接越界、目录、超大文件，以及旧版 DSH 使用会话初始目录的行为。
 
-下方 npm 命令安装已发布的 **1.0.12**，该版本兼容 DSH **v0.1.7-rc.2** 和 **v0.2.0-rc.2**。
-请从 v1.0.11 升级，以移除已废弃的 `settingsScope` 依赖。
+版本 **1.0.13** 包含针对 DSH v0.2.1 的兼容调整和媒体预览修复。
+该版本也保留 v1.0.12 对已废弃的 `settingsScope` 依赖所做的修复。
 
 ### 通过 npm 安装
 
 在 Web profile 中安装并启用 Bundle：
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.12
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.13
 ```
 
 安装后重启 Web profile。
