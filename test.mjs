@@ -6,10 +6,10 @@
  */
 
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, open, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { testing } from "./lib.js";
+import { MAX_BYTES, MIME, testing } from "./lib.js";
 
 assert.equal(testing.extensionOf("movie.mp4"), "mp4");
 assert.equal(testing.extensionOf("http://127.0.0.1:8188/view?filename=frame.png&type=temp"), "png");
@@ -134,6 +134,12 @@ try {
     return react;
   });
   assert.ok(plugin.inject.includes("uiConversation"));
+  for (const [extension, mime] of Object.entries(MIME)) {
+    const source = `media/sample.${extension}`;
+    assert.deepEqual(plugin.testing.extractCandidates(`\`${source}\``), [
+      { source, kind: mime.split("/", 1)[0] },
+    ]);
+  }
   const remotePreferences = { autoRender: false, displayCap: 4, imageMaxPx: 240, comfyUrl: "http://comfy.example.com:8188" };
   assert.deepEqual(plugin.testing.readSettings(remotePreferences), remotePreferences);
   let remoteReads = 0;
@@ -146,6 +152,67 @@ try {
   assert.deepEqual(await plugin.testing.fetchRemoteSettings(remoteConnection), remotePreferences);
   assert.deepEqual(await plugin.testing.fetchRemoteSettings(remoteConnection), remotePreferences);
   assert.equal(remoteReads, 1);
+
+  const hooks = [];
+  let hookIndex = 0;
+  let pendingEffects = [];
+  const cardPlugin = clientBundle.factory(() => ({
+    ...react,
+    createElement: (type, props, ...children) => ({ type, props, children }),
+    useState: (initial) => {
+      const index = hookIndex++;
+      if (!(index in hooks)) hooks[index] = typeof initial === "function" ? initial() : initial;
+      return [hooks[index], (value) => { hooks[index] = value; }];
+    },
+    useEffect: (effect, dependencies) => {
+      const index = hookIndex++;
+      const previous = hooks[index];
+      if (previous && dependencies.every((value, i) => Object.is(value, previous.dependencies[i]))) return;
+      pendingEffects.push(() => {
+        previous?.dispose?.();
+        hooks[index] = { dependencies, dispose: effect() };
+      });
+    },
+  }));
+  let mediaReads = 0;
+  const signals = [];
+  const cardProps = {
+    candidate: { source: "http://comfy.example.com:8188/frame.png", kind: "image" },
+    sessionId: "live",
+    comfyUrl: "http://comfy.example.com:8188",
+    connection: { rpc: { call: async (_channel, _endpoint, _payload, signal) => {
+      signals.push(signal);
+      return { ok: true, value: { dataUrl: `data:image/png;base64,${++mediaReads}` } };
+    } } },
+  };
+  const renderCard = async () => {
+    hookIndex = 0;
+    const view = cardPlugin.testing.MediaCard(cardProps);
+    const effects = pendingEffects;
+    pendingEffects = [];
+    for (const effect of effects) effect();
+    await Promise.resolve();
+    return view;
+  };
+  await renderCard();
+  await renderCard();
+  assert.equal(mediaReads, 1);
+  cardProps.comfyUrl = "https://comfy.example.com:8188";
+  await renderCard();
+  assert.equal(mediaReads, 2);
+  assert.equal(signals[0].aborted, true);
+  cardProps.comfyUrl = "http://other.example.com:8188";
+  await renderCard();
+  const directCard = await renderCard();
+  assert.equal(mediaReads, 2);
+  assert.equal(signals[1].aborted, true);
+  assert.equal(directCard.children[0].children[0].props.src, cardProps.candidate.source);
+  cardProps.candidate = { source: "frame.png", kind: "image" };
+  await renderCard();
+  assert.equal(mediaReads, 3);
+  cardProps.comfyUrl = "http://another.example.com:8188";
+  await renderCard();
+  assert.equal(mediaReads, 3);
 
   assert.equal(plugin.testing.mediaTransport("outputs/frame.png", ""), "workspace");
   assert.equal(plugin.testing.mediaTransport("https://cdn.example.com/frame.png", ""), "direct");
@@ -347,6 +414,28 @@ if (process.argv.includes("--host")) {
   assert.match((await call("read", request)).error.message, /configured ComfyUI address is invalid/);
   settings.comfyUrl = "";
   assert.match((await call("read", { ...request, source: "https://example.com/a.png" })).error.message, /not an allowed ComfyUI/);
+  const { createServer } = await import("node:http");
+  const server = createServer((request, response) => {
+    if (!request.url.startsWith("/missing")) {
+      response.setHeader("Content-Type", request.url.startsWith("/invalid") ? "text/html" : "Image/WebP; charset=binary");
+    }
+    response.end("fixture");
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  try {
+    settings.comfyUrl = `http://127.0.0.1:${server.address().port}`;
+    for (const path of ["invalid", "missing"]) {
+      const rejected = await call("read", { ...request, source: `http://localhost:8188/${path}?filename=a.png` });
+      assert.equal(rejected.ok, false);
+      assert.match(rejected.error.message, /unsupported media type/);
+    }
+    const accepted = await call("read", request);
+    assert.equal(accepted.value.mime, "image/webp");
+    assert.equal(accepted.value.dataUrl, `data:image/webp;base64,${Buffer.from("fixture").toString("base64")}`);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    settings.comfyUrl = "";
+  }
   const workspace = await mkdtemp(join(tmpdir(), "inline-media-"));
   try {
     const original = join(workspace, "original");
@@ -355,6 +444,10 @@ if (process.argv.includes("--host")) {
     await mkdir(current);
     await writeFile(join(original, "frame.png"), "original");
     await writeFile(join(current, "frame.png"), "current");
+    await symlink(original, join(current, "outside"), process.platform === "win32" ? "junction" : "dir");
+    await mkdir(join(current, "folder.png"));
+    const oversized = await open(join(current, "large.png"), "w");
+    try { await oversized.truncate(MAX_BYTES + 1); } finally { await oversized.close(); }
     hostCtx.sessions.set("live", { header: { cwd: original } });
     hostCtx.workingDirectory = { get: () => current };
     hostCtx.sessionQuery = { readSession: async () => ({
@@ -364,9 +457,11 @@ if (process.argv.includes("--host")) {
     for (const sessionId of ["live", "persisted"]) {
       assert.equal((await call("read", { source: "frame.png", sessionId })).value.dataUrl,
         `data:image/png;base64,${Buffer.from("current").toString("base64")}`);
-      for (const source of ["../original/frame.png", join(original, "frame.png")]) {
+      for (const source of ["../original/frame.png", join(original, "frame.png"), "outside/frame.png"]) {
         assert.match((await call("read", { source, sessionId })).error.message, /outside the session workspace/);
       }
+      assert.match((await call("read", { source: "folder.png", sessionId })).error.message, /not a file/);
+      assert.match((await call("read", { source: "large.png", sessionId })).error.message, /exceeds/);
     }
   } finally {
     await rm(workspace, { recursive: true, force: true });

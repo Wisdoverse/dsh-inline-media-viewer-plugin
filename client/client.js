@@ -51,7 +51,7 @@ window.__ModuleLoader__.load({
       return remoteSettingsRequest;
     }
     const MEDIA_EXTENSIONS = new Set([
-      "png", "jpg", "jpeg", "webp", "gif", "avif", "bmp",
+      "png", "jpg", "jpeg", "webp", "gif", "avif", "bmp", "svg",
       "mp4", "webm", "mov", "m4v", "mkv", "avi", "ogv",
       "mp3", "wav", "m4a", "aac", "ogg", "oga", "flac", "opus",
     ]);
@@ -239,14 +239,19 @@ window.__ModuleLoader__.load({
     }
 
     function MediaCard({ candidate, connection, sessionId, imageMaxPx, comfyUrl }) {
-      const proxied = mediaTransport(candidate.source, comfyUrl) !== "direct";
+      const transport = mediaTransport(candidate.source, comfyUrl);
+      const proxied = transport !== "direct";
+      const origin = transport === "comfy-proxy" ? comfyUrl : null;
       const [state, setState] = useState(() => proxied
         ? { status: "loading", src: "" }
         : { status: "ready", src: candidate.source });
       const [expanded, setExpanded] = useState(false);
 
       useEffect(() => {
-        if (!proxied) return undefined;
+        if (!proxied) {
+          setState({ status: "ready", src: candidate.source });
+          return undefined;
+        }
         const controller = new AbortController();
         let active = true;
         setState({ status: "loading", src: "" });
@@ -269,7 +274,7 @@ window.__ModuleLoader__.load({
           active = false;
           controller.abort();
         };
-      }, [candidate.source, connection, proxied, sessionId]);
+      }, [candidate.source, origin, connection, proxied, sessionId]);
 
       useEffect(() => {
         if (!expanded) return undefined;
@@ -610,7 +615,7 @@ window.__ModuleLoader__.load({
     exports.apply = apply;
     exports.inject = inject;
     exports.name = name;
-    exports.testing = Object.freeze({ extractCandidates, fetchRemoteSettings, mediaMentionsDefinition, mediaTransport, readSettings, selectMedia, toolArgumentText });
+    exports.testing = Object.freeze({ extractCandidates, fetchRemoteSettings, MediaCard, mediaMentionsDefinition, mediaTransport, readSettings, selectMedia, toolArgumentText });
     return module.exports;
   },
 });

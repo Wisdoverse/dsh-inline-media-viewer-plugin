@@ -6,9 +6,15 @@
 - Read local media from the current session directory. Restore the last directory change for stored sessions.
 - Keep the session header fallback for earlier DSH versions without the working-directory service.
 - Add regression checks for directory changes and workspace containment in live and stored sessions.
-- Check the v0.2.1-rc.3 Web UI: settings persist and reset, and local images display and enlarge. Escape closes the enlarged image.
-- Check authenticated image reads, HTTP 401 without authentication, and rejection of paths outside the current session workspace.
-- Video playback, audio playback, and ComfyUI transfers remain unchecked on v0.2.1-rc.3.
+- Recognize SVG mentions in the client.
+- Refresh previews after ComfyUI origin changes. Restore direct URLs when a source no longer matches that origin.
+- Check the proxy response Content-Type before reading its body. Reject missing types and non-media types.
+- Add regression checks for media types, preview refresh, symlink escapes, directories, and oversized local files.
+- Pass all 28 Web and API checks on both DSH v0.2.1-rc.2 and v0.2.1-rc.3 in Microsoft Edge.
+- Check PNG, SVG, MP4, WebM, and WAV through workspace reads, direct HTTP URLs, and the ComfyUI proxy.
+- Check settings persistence, reset, display limits, auto-render, image enlargement, and Escape dismissal.
+- Check authentication, workspace containment, redirects, response size limits, and rejection of non-media responses.
+- ComfyUI responses came from a local HTTP fixture. ComfyUI generation workflows remain unchecked.
 
 ## 1.0.12
 
