@@ -18,7 +18,7 @@
 **🚀 Quick install**
 
 ```sh
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.13
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.14
 ```
 
 Restart the Web profile after installation. See [compatibility and installation details](#installation).
@@ -68,6 +68,10 @@ The browser must support the media codec to play its file.
 
 ## Installation
 
+Version **1.0.14** extends support through DSH **v0.2.1-rc.5**.
+On rc.5, Firefox checks pass for PNG previews, image enlargement, WAV and MP4 playback, reload restoration, and settings display.
+Host tests and live API checks also pass. ComfyUI and settings writes remain untested on rc.5.
+
 Version **1.0.13** supports DSH **v0.2.1-rc.2** (`latest`) and **v0.2.1-rc.3** (`next`).
 We checked these npm tags on **2026-10-26**.
 See the [DSH v0.2.1-rc.3 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3).
@@ -91,7 +95,7 @@ It also keeps the v1.0.12 fix for the obsolete `settingsScope` dependency.
 Install and activate the bundle in your Web profile:
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.13
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.14
 ```
 
 Restart the Web profile after installation.

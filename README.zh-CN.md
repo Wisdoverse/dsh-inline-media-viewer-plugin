@@ -18,7 +18,7 @@
 **🚀 快速安装**
 
 ```sh
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.13
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.14
 ```
 
 安装后请重启 Web profile。请查看[兼容性和安装详情](#安装)。
@@ -67,6 +67,10 @@ audio/sound.mp3                    →  <audio controls>
 
 ## 安装
 
+版本 **1.0.14** 将兼容范围扩展至 DSH **v0.2.1-rc.5**。
+已在 rc.5 的 Firefox 中验证 PNG 预览、图片放大、WAV 和 MP4 播放、刷新恢复及设置显示。
+宿主测试和真实 API 检查通过。rc.5 上的 ComfyUI 和设置写入尚未验证。
+
 版本 **1.0.13** 支持 DSH **v0.2.1-rc.2**（`latest`）和 **v0.2.1-rc.3**（`next`）。
 npm 标签核对日期为 **2026-10-26**。
 参见 [DSH v0.2.1-rc.3 发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3)。
@@ -90,7 +94,7 @@ ComfyUI 响应来自本地 HTTP 测试服务，本轮未运行 ComfyUI 生成工
 在 Web profile 中安装并启用 Bundle：
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.13
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.14
 ```
 
 安装后重启 Web profile。

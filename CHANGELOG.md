@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.14 (2026-11-01)
+
+- Extend the DSH compatibility range through v0.2.1-rc.5.
+- Check the upstream API changes and run the host tests with the rc.5 dependencies.
+- Verify live settings and PNG reads on rc.5.
+- Verify PNG preview, image enlargement, WAV and MP4 playback, and preview restoration after reload in Firefox.
+- Verify the settings page. ComfyUI and settings writes remain untested on rc.5.
+
 ## 1.0.13 (2026-10-26)
 
 - Support DSH v0.2.1-rc.2 and v0.2.1-rc.3. Declare the supported range through `engines.dsh`.
