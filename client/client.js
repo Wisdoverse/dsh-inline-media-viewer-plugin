@@ -442,7 +442,7 @@ window.__ModuleLoader__.load({
         comfyUrlHint: "仅用于 ComfyUI 链接；不使用 ComfyUI 可保持为空，本地文件和普通网络 URL 不受影响。",
         comfyUrlError: "地址无效,请使用 http://host:8188 这类格式。",
         reset: "恢复默认",
-        writable: "当前连接不可回写:设置仅临时保存在本会话,刷新后恢复默认。",
+        writable: "当前连接无法保存设置。",
       },
       en: {
         nav: "Media preview",
@@ -457,7 +457,7 @@ window.__ModuleLoader__.load({
         comfyUrlHint: "Used only for ComfyUI links. Leave empty when not using ComfyUI; local files and regular web URLs work independently.",
         comfyUrlError: "Invalid address; use the http://host:8188 form.",
         reset: "Reset to defaults",
-        writable: "This connection cannot write settings: values are session-local until a loopback connection is used.",
+        writable: "This connection cannot save settings.",
       },
     };
 

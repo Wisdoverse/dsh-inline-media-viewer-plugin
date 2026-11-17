@@ -18,7 +18,7 @@
 **🚀 快速安装**
 
 ```sh
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.14
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.15
 ```
 
 安装后请重启 Web profile。请查看[兼容性和安装详情](#安装)。
@@ -67,34 +67,25 @@ audio/sound.mp3                    →  <audio controls>
 
 ## 安装
 
-版本 **1.0.14** 将兼容范围扩展至 DSH **v0.2.1-rc.5**。
-已在 rc.5 的 Firefox 中验证 PNG 预览、图片放大、WAV 和 MP4 播放、刷新恢复及设置显示。
-宿主测试和真实 API 检查通过。rc.5 上的 ComfyUI 和设置写入尚未验证。
+版本 **1.0.15** 支持 DSH **v0.2.2-rc.1**（`latest`）和 **v0.2.2-rc.3**（`next`）。
+npm 标签核对日期为 **2026-11-18**。
+DSH v0.2.2 要求 Node.js **24.9.0** 或更新版本。参见 [DSH v0.2.2-rc.3 发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.3)。
+支持的 DSH 版本范围为 `>=0.1.7-rc.2 <=0.2.2-rc.3`。
 
-版本 **1.0.13** 支持 DSH **v0.2.1-rc.2**（`latest`）和 **v0.2.1-rc.3**（`next`）。
-npm 标签核对日期为 **2026-10-26**。
-参见 [DSH v0.2.1-rc.3 发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3)。
+在 **v0.2.2-rc.1** 和 **v0.2.2-rc.3** 的 Microsoft Edge 中，28 项 Web 和 API 检查分别全部通过。
+PNG 和 SVG 图片解码正常；MP4、WebM 视频和 WAV 音频在工作区、普通 HTTP 和 ComfyUI 代理路径中均实际播放成功。
+设置持久化、恢复默认、媒体数量和高度限制、自动渲染、切换源站、图片放大、Escape 关闭均通过检查，且浏览器没有报错。
+宿主对未认证读取返回 HTTP 401，并拒绝工作区外路径、重定向、超大响应和非媒体 MIME 类型。
 
-在 **v0.2.1-rc.2** 和 **v0.2.1-rc.3** 的真实 Web 页面中，Microsoft Edge 上的 28 项页面和接口检查分别全部通过。
-PNG、SVG 图片显示正常，MP4、WebM 视频和 WAV 音频实际播放成功。
-检查覆盖工作区文件、普通 HTTP 链接和 ComfyUI 代理三条路径。
-ComfyUI 响应来自本地 HTTP 测试服务，本轮未运行 ComfyUI 生成工作流。
-
-设置持久化、恢复默认、显示数量限制、自动渲染开关、图片放大和 Escape 关闭均通过检查。
-切换 ComfyUI 地址后，已有预览会刷新，并正确切换代理读取和直接 URL 读取。
-本地读取使用会话当前工作目录，并恢复已保存的目录切换记录。
-宿主拒绝未认证读取、工作区外路径、重定向、超大响应和非媒体响应。
-宿主检查还覆盖历史会话、符号链接越界、目录、超大文件，以及旧版 DSH 使用会话初始目录的行为。
-
-版本 **1.0.13** 包含针对 DSH v0.2.1 的兼容调整和媒体预览修复。
-该版本也保留 v1.0.12 对已废弃的 `settingsScope` 依赖所做的修复。
+ComfyUI 响应来自本地 HTTP 协议测试服务，本轮未运行 ComfyUI 生成工作流。
+本轮未验证其他浏览器或媒体编码格式。
 
 ### 通过 npm 安装
 
 在 Web profile 中安装并启用 Bundle：
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.14
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.15
 ```
 
 安装后重启 Web profile。
@@ -140,7 +131,7 @@ dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.14
 | 媒体最大高度 | `380 px` | `160`–`1200 px` |
 | ComfyUI 源站（可选） | 留空 | `http(s)://host[:port]` |
 
-设置值保存在当前 DSH profile 配置中。升级时，DSH 会导入旧 `settings.yaml` 中的 `inline-media` 设置。只有回环连接可以写入；远程浏览器可通过插件的认证 RPC 通道读取这四项设置，但不能修改。
+设置值保存在当前 DSH profile 配置中。升级时，DSH 会导入旧 `settings.yaml` 中的 `inline-media` 设置。客户端遵循 DSH 设置表单的 `writable` 标记。DSH 负责设置授权。通过可信远程连接的已认证浏览器所有者可以保存这四项非机密设置。
 
 ### ComfyUI 源站
 
@@ -162,7 +153,7 @@ ComfyUI 来源。非空的无效地址会明确报错，而不会静默回退到
 - 本地读取仅限当前会话的工作区和已知媒体扩展名。
 - 远程读取只能访问配置的 ComfyUI 源站，并拒绝重定向。
 - 本地文件和远程响应均限制为最大 48 MiB。
-- 设置写入仅允许回环连接。
+- DSH 负责设置授权。通过可信远程连接的已认证浏览器所有者可以保存设置。
 - 浏览器接收的是 `data:` URL，而不是文件系统路径。
 
 完整的信任模型和已知限制请参阅 [SECURITY.md](SECURITY.md)。

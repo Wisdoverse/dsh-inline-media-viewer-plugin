@@ -18,7 +18,7 @@
 **🚀 Quick install**
 
 ```sh
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.14
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.15
 ```
 
 Restart the Web profile after installation. See [compatibility and installation details](#installation).
@@ -68,34 +68,29 @@ The browser must support the media codec to play its file.
 
 ## Installation
 
-Version **1.0.14** extends support through DSH **v0.2.1-rc.5**.
-On rc.5, Firefox checks pass for PNG previews, image enlargement, WAV and MP4 playback, reload restoration, and settings display.
-Host tests and live API checks also pass. ComfyUI and settings writes remain untested on rc.5.
+Version **1.0.15** supports DSH **v0.2.2-rc.1** (`latest`) and **v0.2.2-rc.3** (`next`).
+We checked these npm tags on **2026-11-18**.
+DSH v0.2.2 requires Node.js **24.9.0** or later. See the [DSH v0.2.2-rc.3 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.3).
+The supported DSH range is `>=0.1.7-rc.2 <=0.2.2-rc.3`.
 
-Version **1.0.13** supports DSH **v0.2.1-rc.2** (`latest`) and **v0.2.1-rc.3** (`next`).
-We checked these npm tags on **2026-10-26**.
-See the [DSH v0.2.1-rc.3 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3).
+All 28 Web and API checks passed in Microsoft Edge on both **v0.2.2-rc.1** and **v0.2.2-rc.3**.
+PNG and SVG images decoded. MP4 and WebM videos played. WAV audio played.
+Checks covered workspace files, direct HTTP URLs, and the ComfyUI proxy.
 
-On **v0.2.1-rc.2** and **v0.2.1-rc.3**, all 28 Web and API checks passed in Microsoft Edge for each version.
-PNG and SVG images displayed. MP4 and WebM videos played, and WAV audio played.
-These checks covered workspace files, direct HTTP URLs, and the ComfyUI proxy.
-A local HTTP fixture supplied ComfyUI responses. We did not run ComfyUI generation workflows.
+ComfyUI responses came from a local HTTP protocol fixture. We did not run ComfyUI generation workflows.
 
-Settings persistence, reset, display limits, auto-render, image enlargement, and Escape dismissal passed.
-Previews refresh when the ComfyUI origin changes, including transitions between proxy reads and direct URLs.
-Local reads follow the session's current working directory, including stored directory changes.
-The host rejected unauthenticated reads, paths outside the workspace, redirects, oversized responses, and non-media responses.
-Host checks also cover stored sessions, symlink escapes, directories, oversized files, and the header fallback for earlier DSH versions.
+Settings persistence, default reset, item and height limits, auto-render, origin changes, image enlargement, and Escape dismissal passed.
+The browser reported no errors during these checks.
+The host returned HTTP 401 for unauthenticated reads and rejected out-of-workspace paths, redirects, oversized responses, and non-media MIME types.
 
-Version **1.0.13** includes the v0.2.1 compatibility changes and media fixes.
-It also keeps the v1.0.12 fix for the obsolete `settingsScope` dependency.
+We did not check other browsers or media codecs.
 
 ### From npm
 
 Install and activate the bundle in your Web profile:
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.14
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.15
 ```
 
 Restart the Web profile after installation.
@@ -144,9 +139,10 @@ switch live between English and Chinese.
 | ComfyUI origin (optional) | Empty | `http(s)://host[:port]` |
 
 Settings are stored in the active DSH profile configuration. DSH imports the
-previous `inline-media` section from `settings.yaml` when upgrading. Writes are
-available only on loopback connections; remote browsers can read these four
-settings through the plugin's authenticated RPC channel but cannot change them.
+previous `inline-media` section from `settings.yaml` when upgrading. The client
+follows the DSH settings form's `writable` flag. DSH controls settings
+authorization. Authenticated browser owners can persist these four non-secret
+settings through trusted remote connections.
 
 ### ComfyUI origin
 
@@ -173,7 +169,8 @@ network proxy:
 - Remote reads can target only the configured ComfyUI origin; redirects are
   refused.
 - Local files and remote responses are capped at 48 MiB.
-- Settings writes are restricted to loopback connections.
+- DSH controls settings authorization. Authenticated browser owners can persist
+  settings through trusted remote connections.
 - The browser receives media as `data:` URLs rather than filesystem paths.
 
 See [SECURITY.md](SECURITY.md) for the complete trust model and known
