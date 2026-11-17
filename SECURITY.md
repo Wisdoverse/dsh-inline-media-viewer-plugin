@@ -14,7 +14,7 @@ exfiltration, no arbitrary SSRF, no unbounded memory use.
 - Only known media extensions are accepted (MIME map in `lib.js`).
 - Size cap: 48 MiB per file.
 - The client must supply a valid session id.
-- On DSH v0.2.1, the host uses the session's current working directory.
+- When DSH provides the working-directory service, the host uses the session's current directory.
   For stored sessions, the host reads the last `working-directory/change` event.
   Earlier DSH versions use the session header.
   The client cannot select the workspace root.
@@ -34,8 +34,8 @@ exfiltration, no arbitrary SSRF, no unbounded memory use.
   rejected. A non-empty invalid value fails remote reads with an explicit
   error instead of silently retargeting; an empty value uses the built-in
   default.
-- Settings writes are loopback-only (see below), so only the local user
-  can point the proxy at another host — a remote viewer cannot retarget it.
+- DSH authorizes settings writes. An authenticated browser owner can change
+  the configured origin through a trusted connection.
 - `redirect: "error"` — redirects are refused.
 - 20 s timeout, 48 MiB response cap, and the response MIME must be
   image/video/audio.
@@ -53,15 +53,16 @@ exfiltration, no arbitrary SSRF, no unbounded memory use.
 - Values are normalized client-side and validated server-side against the
   schema (autoRender boolean; displayCap 1–30; imageMaxPx 160–1200;
   comfyUrl string ≤ 512 chars, parsed to a bare origin at use time).
-- The settings service only writes back for **loopback** connections; remote
-  browsers are read-only, so a remote viewer cannot persist state.
+- The client respects the DSH settings form's `writable` flag.
+- DSH controls settings authorization. Authenticated browser owners can persist
+  settings through trusted remote connections.
+  See DSH's [browser admission](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.3/packages/client/connection/src/rpc-host.ts#L128)
+  and [settings controller](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.3/packages/api/settings-controller/src/index.ts#L98).
 - The plugin's authenticated `settings` RPC returns only its four non-secret
   display and ComfyUI preferences to remote browsers.
 
 ## Known limitations
 
-- Remote (non-loopback) browsers cannot persist settings by design (DSH
-  settings writes are loopback-only).
 - ComfyUI on a non-standard host/port: set the server address in the settings
   page. The proxy fetches only from that configured origin, so it must be
   reachable from the DSH host process — plain `http://` for a local install,

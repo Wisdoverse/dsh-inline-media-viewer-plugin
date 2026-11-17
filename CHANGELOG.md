@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.15 (2026-11-18)
+
+- Extend the DSH compatibility range through v0.2.2-rc.3. The previous upper bound caused DSH v0.2.2 to disable the plugin.
+- Pass all 28 Web and API checks on each of DSH v0.2.2-rc.1 and v0.2.2-rc.3 in Microsoft Edge.
+- Pass unit, host, and lint checks.
+- Check host compatibility with Cordis 4.1.0 and Schemastery 3.19.0 within the declared peer dependency ranges.
+- Correct the client read-only message and documentation. DSH controls authorization, and authenticated browser owners can persist settings through trusted remote connections. We did not change host access control.
+- Use a local HTTP protocol fixture for ComfyUI responses. ComfyUI generation workflows remain unchecked.
+
 ## 1.0.14 (2026-11-01)
 
 - Extend the DSH compatibility range through v0.2.1-rc.5.
