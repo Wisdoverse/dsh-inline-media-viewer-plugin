@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.16 (2026-11-26)
+
+- Extend the DSH compatibility range through v0.2.2-rc.5 and include v0.2.3-alpha.2.
+- Resolve saved-session preview paths from the working directory calculated by DSH, including host workspace moves on v0.2.3-alpha.2.
+- Accept the Cordis and Schemastery prereleases that DSH v0.2.3-alpha.2 includes.
+- Pass 29 Web and API checks in Microsoft Edge on each of DSH v0.2.2-rc.5 and v0.2.3-alpha.2.
+- Check ComfyUI media transfers with a local HTTP service.
+
 ## 1.0.15 (2026-11-18)
 
 - Extend the DSH compatibility range through v0.2.2-rc.3. The previous upper bound caused DSH v0.2.2 to disable the plugin.

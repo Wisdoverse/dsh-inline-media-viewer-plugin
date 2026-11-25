@@ -18,7 +18,7 @@
 **🚀 Quick install**
 
 ```sh
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.15
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.16
 ```
 
 Restart the Web profile after installation. See [compatibility and installation details](#installation).
@@ -68,29 +68,25 @@ The browser must support the media codec to play its file.
 
 ## Installation
 
-Version **1.0.15** supports DSH **v0.2.2-rc.1** (`latest`) and **v0.2.2-rc.3** (`next`).
-We checked these npm tags on **2026-11-18**.
-DSH v0.2.2 requires Node.js **24.9.0** or later. See the [DSH v0.2.2-rc.3 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.3).
-The supported DSH range is `>=0.1.7-rc.2 <=0.2.2-rc.3`.
+Version **1.0.16** supports DSH **v0.2.2-rc.5** (`latest` and `next`) and **v0.2.3-alpha.2** (`alpha`, experimental prerelease).
+We checked these npm tags on **2026-11-26**.
+DSH v0.2.2 requires Node.js **>=24.9.0**. See the [DSH v0.2.2-rc.5 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.5).
+DSH v0.2.3-alpha.2 requires Node.js **^24.22.3 || >=26.13.1**. See the [DSH v0.2.3-alpha.2 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.3-alpha.2).
+The supported DSH range is `>=0.1.7-rc.2 <=0.2.2-rc.5 || 0.2.3-alpha.2`.
 
-All 28 Web and API checks passed in Microsoft Edge on both **v0.2.2-rc.1** and **v0.2.2-rc.3**.
-PNG and SVG images decoded. MP4 and WebM videos played. WAV audio played.
-Checks covered workspace files, direct HTTP URLs, and the ComfyUI proxy.
+For a saved session, previews use the working directory that DSH resolves.
+This includes workspace moves on v0.2.3-alpha.2.
 
-ComfyUI responses came from a local HTTP protocol fixture. We did not run ComfyUI generation workflows.
-
-Settings persistence, default reset, item and height limits, auto-render, origin changes, image enlargement, and Escape dismissal passed.
-The browser reported no errors during these checks.
-The host returned HTTP 401 for unauthenticated reads and rejected out-of-workspace paths, redirects, oversized responses, and non-media MIME types.
-
-We did not check other browsers or media codecs.
+Each version passed 29 Web and API checks in Microsoft Edge.
+The checks covered image previews, audio and video playback, settings, and workspace limits for media reads.
+A local HTTP service supplied the ComfyUI media responses.
 
 ### From npm
 
 Install and activate the bundle in your Web profile:
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.15
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.16
 ```
 
 Restart the Web profile after installation.

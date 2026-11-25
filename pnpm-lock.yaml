@@ -9,10 +9,10 @@ importers:
   .:
     dependencies:
       '@deepseek-ai/cordis':
-        specifier: ^4.0.4
+        specifier: ^4.0.4 || 4.2.0-alpha.1
         version: 4.0.4
       '@deepseek-ai/schemastery':
-        specifier: ^3.18.4
+        specifier: ^3.18.4 || 3.20.0-alpha.1
         version: 3.18.4
 
 packages:

@@ -22,20 +22,22 @@ assert.equal(testing.isInside("/workspace", "/workspace/out/video.mp4"), true);
 assert.equal(testing.isInside("/workspace", "/workspace-other/video.mp4"), false);
 assert.equal(testing.isInside("/workspace", "/workspace"), true);
 assert.equal(testing.isInside("/workspace", "/workspace/../outside.mp4"), false);
-let historyReads = 0;
+let observations = 0;
+let disposals = 0;
 const sessionQuery = {
-  async readSession() {
-    historyReads += 1;
-    return { session: { cwd: "/persisted/workspace" } };
+  async observeSession() {
+    observations += 1;
+    return { header: { cwd: "/persisted/workspace" }, [Symbol.dispose]() { disposals += 1; } };
   },
 };
 assert.equal(
   await testing.resolveSessionCwd(new Map([["live", { header: { cwd: "/live/workspace" } }]]), sessionQuery, "live"),
   "/live/workspace",
 );
-assert.equal(historyReads, 0);
+assert.equal(observations, 0);
 assert.equal(await testing.resolveSessionCwd(new Map(), sessionQuery, "persisted"), "/persisted/workspace");
-assert.equal(historyReads, 1);
+assert.equal(observations, 1);
+assert.equal(disposals, 1);
 const liveSession = { header: { cwd: "/original/workspace" } };
 assert.equal(await testing.resolveSessionCwd(new Map([["live", liveSession]]), sessionQuery, "live", {
   get: (session) => {
@@ -43,17 +45,18 @@ assert.equal(await testing.resolveSessionCwd(new Map([["live", liveSession]]), s
     return "/current/workspace";
   },
 }), "/current/workspace");
-assert.equal(historyReads, 1);
+assert.equal(observations, 1);
 assert.equal(await testing.resolveSessionCwd(new Map(), {
-  readSession: async () => ({
-    session: { cwd: "/original/workspace" },
+  observeSession: async () => ({
+    header: { cwd: "/original/workspace" },
+    projections: { values: { workingDirectory: "/current/workspace" } },
     events: [
-      { type: "working-directory/change", data: { cwd: "/first/workspace" } },
-      { type: "working-directory/change", data: { cwd: "/current/workspace" } },
-      { type: "tool/call", data: { cwd: "/untrusted/workspace" } },
+      { type: "working-directory/change", data: { cwd: "/legacy/workspace" } },
     ],
+    [Symbol.dispose]() { disposals += 1; },
   }),
 }, "persisted"), "/current/workspace");
+assert.equal(disposals, 2);
 // Default origin: ComfyUI's standard local address; loopback aliases are
 // accepted and rewritten onto it.
 assert.equal(
@@ -450,9 +453,10 @@ if (process.argv.includes("--host")) {
     try { await oversized.truncate(MAX_BYTES + 1); } finally { await oversized.close(); }
     hostCtx.sessions.set("live", { header: { cwd: original } });
     hostCtx.workingDirectory = { get: () => current };
-    hostCtx.sessionQuery = { readSession: async () => ({
-      session: { cwd: original },
-      events: [{ type: "working-directory/change", data: { cwd: current } }],
+    hostCtx.sessionQuery = { observeSession: async () => ({
+      header: { cwd: original },
+      projections: { values: { workingDirectory: current } },
+      [Symbol.dispose]() {},
     }) };
     for (const sessionId of ["live", "persisted"]) {
       assert.equal((await call("read", { source: "frame.png", sessionId })).value.dataUrl,
