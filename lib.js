@@ -82,9 +82,12 @@ export function isInside(root, target) {
 export async function resolveSessionCwd(sessions, sessionQuery, sessionId, workingDirectory) {
   const live = sessions.get(sessionId);
   if (live) return workingDirectory ? workingDirectory.get(live) : live.header.cwd;
-  const snapshot = await sessionQuery.readSession(sessionId);
-  return snapshot.events?.findLast((event) => event.type === "working-directory/change")?.data.cwd
-    ?? snapshot.session.cwd;
+  const observation = await sessionQuery.observeSession(sessionId);
+  try {
+    return observation.projections?.values.workingDirectory ?? observation.header.cwd;
+  } finally {
+    observation[Symbol.dispose]();
+  }
 }
 
 /**

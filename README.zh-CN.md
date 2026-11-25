@@ -18,7 +18,7 @@
 **🚀 快速安装**
 
 ```sh
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.15
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.16
 ```
 
 安装后请重启 Web profile。请查看[兼容性和安装详情](#安装)。
@@ -67,25 +67,24 @@ audio/sound.mp3                    →  <audio controls>
 
 ## 安装
 
-版本 **1.0.15** 支持 DSH **v0.2.2-rc.1**（`latest`）和 **v0.2.2-rc.3**（`next`）。
-npm 标签核对日期为 **2026-11-18**。
-DSH v0.2.2 要求 Node.js **24.9.0** 或更新版本。参见 [DSH v0.2.2-rc.3 发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.3)。
-支持的 DSH 版本范围为 `>=0.1.7-rc.2 <=0.2.2-rc.3`。
+版本 **1.0.16** 支持 DSH **v0.2.2-rc.5**（`latest` 和 `next`）以及 **v0.2.3-alpha.2**（`alpha`，实验预发布版）。
+npm 标签核对日期为 **2026-11-26**。
+DSH v0.2.2 要求 Node.js **>=24.9.0**。参见 [DSH v0.2.2-rc.5 发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.5)。
+DSH v0.2.3-alpha.2 要求 Node.js **^24.22.3 || >=26.13.1**。参见 [DSH v0.2.3-alpha.2 发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.3-alpha.2)。
+支持的 DSH 版本范围为 `>=0.1.7-rc.2 <=0.2.2-rc.5 || 0.2.3-alpha.2`。
 
-在 **v0.2.2-rc.1** 和 **v0.2.2-rc.3** 的 Microsoft Edge 中，28 项 Web 和 API 检查分别全部通过。
-PNG 和 SVG 图片解码正常；MP4、WebM 视频和 WAV 音频在工作区、普通 HTTP 和 ComfyUI 代理路径中均实际播放成功。
-设置持久化、恢复默认、媒体数量和高度限制、自动渲染、切换源站、图片放大、Escape 关闭均通过检查，且浏览器没有报错。
-宿主对未认证读取返回 HTTP 401，并拒绝工作区外路径、重定向、超大响应和非媒体 MIME 类型。
+已保存会话的预览使用 DSH 解析出的工作目录，并跟随 v0.2.3-alpha.2 的工作区移动。
 
-ComfyUI 响应来自本地 HTTP 协议测试服务，本轮未运行 ComfyUI 生成工作流。
-本轮未验证其他浏览器或媒体编码格式。
+两版分别在 Microsoft Edge 上通过 29 项 Web 和 API 检查。
+检查覆盖图片预览、音视频播放、设置及媒体读取的工作区限制。
+ComfyUI 媒体响应由本地 HTTP 测试服务提供。
 
 ### 通过 npm 安装
 
 在 Web profile 中安装并启用 Bundle：
 
 ```bash
-dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.15
+dsh plugin --profile web add @wisdoverse/dsh-inline-media-viewer@1.0.16
 ```
 
 安装后重启 Web profile。
